@@ -19,25 +19,28 @@ export default function ChatPage() {
 
     try {
       const response = await fetch('https://api.x.ai/v1/chat/completions', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'  // make sure it's correct
-  },
-  body: JSON.stringify({
-    model: "grok-beta",
-    messages: [{ role: "user", content: userMessage }]
-  })
-});
-
-      if (!response.ok) throw new Error('API error');
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'
+        },
+        body: JSON.stringify({
+          model: "grok-beta",
+          messages: [
+            { role: "system", content: "You are a helpful AI assistant focused on Wales, its culture, history, language, and current events." },
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.7,
+        })
+      });
 
       const data = await response.json();
-      const reply = data.choices[0].message.content;
+      const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
 
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting to Grok right now. Please try again shortly." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to Grok. Please try again." }]);
     }
 
     setIsLoading(false);
@@ -65,16 +68,20 @@ export default function ChatPage() {
       </div>
 
       <div className="p-6 border-t border-zinc-800 bg-zinc-900">
-        <div className="flex gap-3 max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto flex gap-3">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything..."
+            placeholder="Ask me anything about Wales..."
             className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
           />
-          <button onClick={sendMessage} disabled={isLoading} className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50">
+          <button 
+            onClick={sendMessage}
+            disabled={isLoading}
+            className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
+          >
             Send
           </button>
         </div>
