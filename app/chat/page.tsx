@@ -24,22 +24,22 @@ export default function ChatPage() {
   };
 
   const generateImage = () => {
-    if (!input.trim() || isLoading) return;
+  if (!input.trim()) return;
+  setIsLoading(true);
 
-    const prompt = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${prompt}` }]);
-    setInput('');
-    setIsLoading(true);
+  const prompt = input.trim();
+  setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${prompt}` }]);
+  setInput('');
 
-    setTimeout(() => {
-      const seed = prompt.replace(/\s+/g, '').slice(0, 20);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `🖼️ **Generated Image:** ${prompt}\n\n![${prompt}](https://picsum.photos/seed/${seed}/800/600)` 
-      }]);
-      setIsLoading(false);
-    }, 1500);
-  };
+  setTimeout(() => {
+    const seed = Date.now();
+    setMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: `🖼️ **Generated Image:** ${prompt}\n\n![${prompt}](https://picsum.photos/id/${(seed % 1000) + 100}/800/600)` 
+    }]);
+    setIsLoading(false);
+  }, 1200);
+};
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
