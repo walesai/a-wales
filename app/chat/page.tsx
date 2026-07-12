@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. What would you like to know?" }
+    { role: 'assistant', content: "Bore da! I'm Ted, your AI companion for Wales. What would you like to know?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
