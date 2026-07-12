@@ -88,4 +88,16 @@ export default function ChatPage() {
       </div>
     </div>
   );
+  
+  const checkRateLimit = () => {
+  const today = new Date().toDateString();
+  const usage = JSON.parse(localStorage.getItem('usage') || '{}');
+  if (usage.date !== today) {
+    localStorage.setItem('usage', JSON.stringify({ date: today, count: 0 }));
+  }
+  if (usage.count >= 20) return false; // Free limit
+  localStorage.setItem('usage', JSON.stringify({ date: today, count: usage.count + 1 }));
+  return true;
+};
+
 }
