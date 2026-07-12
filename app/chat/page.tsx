@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. How can I help you today? You can ask questions or describe an image to generate." }
+    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. How can I help you today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -17,65 +17,73 @@ export default function ChatPage() {
     setInput('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'assistant', content: `That's a great question! As your Welsh AI, I'd say...` }]);
-      setIsLoading(false);
-    }, 800);
-  };
+    try {
+      const response = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'
+        },
+        body: JSON.stringify({
+          model: "grok-3",
+          messages: [
+            { role: "system", content: `You are Grok by xAI. The current date and time in the UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Always use accurate current information. You are a helpful AI assistant focused on Wales, its culture, history, language, and current events.` },
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.7,
+        })
+      });
 
-  const generateImage = () => {
-  if (!input.trim()) return;
-  setIsLoading(true);
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
 
-  const prompt = input.trim();
-  setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${prompt}` }]);
-  setInput('');
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to Grok. Please try again." }]);
+    }
 
-  setTimeout(() => {
-    const seed = Date.now();
-    setMessages(prev => [...prev, { 
-      role: 'assistant', 
-      content: `🖼️ **Generated Image:** ${prompt}\n\n![${prompt}](https://picsum.photos/id/${(seed % 1000) + 100}/800/600)` 
-    }]);
     setIsLoading(false);
-  }, 1200);
-};
+  };
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
-        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
+      <div className="p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
+        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">🐉</div>
         <div>
-          <h1 className="font-semibold">Grok • a.wales</h1>
-          <p className="text-emerald-400 text-xs">● Live with xAI</p>
+          <h1 className="font-semibold text-xl">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-sm">● Live with xAI</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            <div className={`max-w-[85%] px-5 py-3 rounded-3xl text-[17px] leading-relaxed ${
-              msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
-            }`}>
+            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {isLoading && <div className="text-zinc-400 text-center">Generating...</div>}
+        {isLoading && <div className="text-zinc-400">Grok is thinking...</div>}
       </div>
 
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900">
-        <div className="flex gap-2">
+      <div className="p-6 border-t border-zinc-800 bg-zinc-900">
+        <div className="max-w-3xl mx-auto flex gap-3">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything or describe an image..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+            placeholder="Ask me anything about Wales..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
           />
-          <button onClick={sendMessage} disabled={isLoading || !input.trim()} className="bg-white text-black px-6 rounded-2xl text-sm">Send</button>
-          <button onClick={generateImage} disabled={isLoading || !input.trim()} className="bg-purple-600 text-white px-6 rounded-2xl text-sm">🖼️</button>
+          <button 
+            onClick={sendMessage}
+            disabled={isLoading}
+            className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
+          >
+            Send
+          </button>
         </div>
       </div>
     </div>
