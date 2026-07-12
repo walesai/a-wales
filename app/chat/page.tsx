@@ -26,21 +26,22 @@ export default function ChatPage() {
         },
         body: JSON.stringify({
           model: "grok-beta",
-          messages: [
-            { role: "system", content: "You are a helpful AI assistant focused on Wales, its culture, history, language, and current events." },
-            ...messages.map(m => ({ role: m.role, content: m.content })),
-            { role: "user", content: userMessage }
-          ],
-          temperature: 0.7,
+          messages: [{ role: "user", content: userMessage }]
         })
       });
 
-      const data = await response.json();
-      const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API Error:", response.status, errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
 
+      const data = await response.json();
+      const reply = data.choices?.[0]?.message?.content || "No response from Grok.";
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to Grok. Please try again." }]);
+    } catch (error: any) {
+      console.error("Full error:", error);
+      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message || 'Unknown error'}` }]);
     }
 
     setIsLoading(false);
