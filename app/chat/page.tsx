@@ -26,22 +26,21 @@ export default function ChatPage() {
         },
         body: JSON.stringify({
           model: "grok-3",
-          messages: [{ role: "user", content: userMessage }]
+          messages: [
+            { role: "system", content: "You are a helpful AI assistant focused on Wales, its culture, history, language, and current events." },
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.7,
         })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("API Error:", response.status, errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
       const data = await response.json();
-      const reply = data.choices?.[0]?.message?.content || "No response from Grok.";
+      const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-    } catch (error: any) {
-      console.error("Full error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message || 'Unknown error'}` }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to Grok. Please try again." }]);
     }
 
     setIsLoading(false);
@@ -49,18 +48,20 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
-        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">🐉</div>
+      <div className="p-4 md:p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
+        <div className="w-9 h-9 md:w-11 md:h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl md:text-3xl">🐉</div>
         <div>
-          <h1 className="font-semibold text-xl">Grok • a.wales</h1>
-          <p className="text-emerald-400 text-sm">● Live with xAI</p>
+          <h1 className="font-semibold text-lg md:text-xl">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-xs md:text-sm">● Live with xAI</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
+            <div className={`max-w-[85%] px-5 py-3.5 rounded-3xl text-base md:text-lg ${
+              msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
+            }`}>
               {msg.content}
             </div>
           </div>
@@ -68,7 +69,7 @@ export default function ChatPage() {
         {isLoading && <div className="text-zinc-400">Grok is thinking...</div>}
       </div>
 
-      <div className="p-6 border-t border-zinc-800 bg-zinc-900">
+      <div className="p-4 md:p-6 border-t border-zinc-800 bg-zinc-900">
         <div className="max-w-3xl mx-auto flex gap-3">
           <input
             type="text"
@@ -76,12 +77,12 @@ export default function ChatPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder="Ask me anything about Wales..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-5 py-4 focus:outline-none focus:border-blue-500 text-base"
           />
           <button 
             onClick={sendMessage}
             disabled={isLoading}
-            className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
+            className="bg-white text-black px-8 md:px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
           >
             Send
           </button>
