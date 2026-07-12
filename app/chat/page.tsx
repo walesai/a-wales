@@ -25,7 +25,7 @@ export default function ChatPage() {
           'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'
         },
         body: JSON.stringify({
-          model: "grok-beta",
+          model: "grok 3",
           messages: [{ role: "user", content: userMessage }]
         })
       });
