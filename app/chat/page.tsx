@@ -27,7 +27,7 @@ export default function ChatPage() {
         body: JSON.stringify({
           model: "grok-3",
           messages: [
-            { role: "system", content: "You are a helpful, friendly AI assistant with full real-time knowledge, including current date, time, and news. You are focused on Wales but can answer any question." },
+            { role: "system", content: "You are Grok, a helpful AI built by xAI. You have real-time knowledge including the current date and time. Always be accurate with dates and current events. Focus on Wales when relevant." },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: userMessage }
           ],
