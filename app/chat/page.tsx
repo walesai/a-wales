@@ -19,21 +19,16 @@ export default function ChatPage() {
 
     try {
       const response = await fetch('https://api.x.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'  // ← Replace this line
-        },
-        body: JSON.stringify({
-          model: "grok-beta",
-          messages: [
-            { role: "system", content: "You are a helpful, friendly AI assistant with deep knowledge of Wales, its culture, history, language (Welsh), and current events." },
-            ...messages,
-            { role: "user", content: userMessage }
-          ],
-          temperature: 0.7,
-        })
-      });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'  // make sure it's correct
+  },
+  body: JSON.stringify({
+    model: "grok-beta",
+    messages: [{ role: "user", content: userMessage }]
+  })
+});
 
       if (!response.ok) throw new Error('API error');
 
