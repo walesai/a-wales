@@ -48,18 +48,20 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
-        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
+      {/* Header */}
+      <div className="p-3 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
+        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-xl">🐉</div>
         <div>
-          <h1 className="font-semibold">Grok • a.wales</h1>
+          <h1 className="font-semibold text-lg">Grok • a.wales</h1>
           <p className="text-emerald-400 text-xs">● Live</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            <div className={`max-w-[85%] px-5 py-3.5 rounded-3xl text-[17px] leading-relaxed ${
+            <div className={`max-w-[85%] px-5 py-3 rounded-2xl text-[17px] leading-relaxed ${
               msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
             }`}>
               {msg.content}
@@ -69,25 +71,26 @@ export default function ChatPage() {
         {isLoading && <div className="text-zinc-400 text-center">Grok is thinking...</div>}
       </div>
 
+      {/* Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900">
-  <div className="flex gap-2">
-    <input
-      type="text"
-      value={input}
-      onChange={(e) => setInput(e.target.value)}
-      onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-      placeholder="Ask me anything..."
-      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-base focus:outline-none focus:border-blue-500"
-    />
-    <button 
-      onClick={sendMessage}
-      disabled={isLoading || !input.trim()}
-      className="bg-white text-black px-6 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
-    >
-      Send
-    </button>
-  </div>
-</div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder="Ask me anything..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-base focus:outline-none focus:border-blue-500"
+          />
+          <button 
+            onClick={sendMessage}
+            disabled={isLoading || !input.trim()}
+            className="bg-white text-black px-7 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
+          >
+            Send
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
