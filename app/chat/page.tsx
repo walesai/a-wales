@@ -69,25 +69,25 @@ export default function ChatPage() {
         {isLoading && <div className="text-zinc-400 text-center">Grok is thinking...</div>}
       </div>
 
-      <div className="p-4 border-t border-zinc-800 bg-zinc-900">
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-5 py-3.5 focus:outline-none focus:border-blue-500 text-base"
-          />
-          <button 
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className="bg-white text-black px-8 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50 flex-shrink-0"
-          >
-            Send
-          </button>
-        </div>
-      </div>
+      <div className="p-3 border-t border-zinc-800 bg-zinc-900">
+  <div className="flex gap-2">
+    <input
+      type="text"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+      placeholder="Ask me anything..."
+      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-base focus:outline-none focus:border-blue-500"
+    />
+    <button 
+      onClick={sendMessage}
+      disabled={isLoading || !input.trim()}
+      className="bg-white text-black px-6 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
+    >
+      Send
+    </button>
+  </div>
+</div>
     </div>
   );
 }
