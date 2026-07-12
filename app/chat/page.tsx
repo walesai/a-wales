@@ -4,77 +4,82 @@ import { useState } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Bore da! I'm Grok from a.wales. How can I help you today?" }
+    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. How can I help you today?" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMsg = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
     setIsLoading(true);
 
-    // Improved simulated response
-    setTimeout(() => {
-      const response = `Thanks for asking about "${userMsg}". As your Welsh AI companion, I'd say Wales has a fascinating mix of history and modern innovation. What else would you like to know?`;
-      
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-      setIsLoading(false);
-    }, 800);
+    try {
+      const response = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'  // ← Replace this line
+        },
+        body: JSON.stringify({
+          model: "grok-beta",
+          messages: [
+            { role: "system", content: "You are a helpful, friendly AI assistant with deep knowledge of Wales, its culture, history, language (Welsh), and current events." },
+            ...messages,
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.7,
+        })
+      });
+
+      if (!response.ok) throw new Error('API error');
+
+      const data = await response.json();
+      const reply = data.choices[0].message.content;
+
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting to Grok right now. Please try again shortly." }]);
+    }
+
+    setIsLoading(false);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950">
-      {/* Header */}
-      <div className="border-b border-zinc-800 bg-zinc-900 p-5 flex items-center gap-4">
-        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">
-          🐉
-        </div>
+    <div className="flex flex-col h-screen bg-zinc-950 text-white">
+      <div className="p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
+        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">🐉</div>
         <div>
-          <h1 className="text-xl font-semibold">Grok • a.wales</h1>
-          <p className="text-sm text-emerald-400">● Always ready to help</p>
+          <h1 className="font-semibold text-xl">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-sm">● Live with xAI</p>
         </div>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-8">
-        {messages.map((msg, index) => (
-          <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] px-6 py-4 rounded-3xl ${
-              msg.role === 'user' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-zinc-800 text-zinc-100'
-            }`}>
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
+            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-zinc-800 px-6 py-4 rounded-3xl text-zinc-400">Thinking...</div>
-          </div>
-        )}
+        {isLoading && <div className="text-zinc-400">Grok is thinking...</div>}
       </div>
 
-      {/* Input Area */}
       <div className="p-6 border-t border-zinc-800 bg-zinc-900">
-        <div className="max-w-3xl mx-auto flex gap-4">
+        <div className="flex gap-3 max-w-3xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything about Wales..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 text-lg"
+            placeholder="Ask me anything..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
           />
-          <button 
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className="bg-white hover:bg-white/90 disabled:bg-zinc-700 text-black font-medium px-10 rounded-2xl transition"
-          >
+          <button onClick={sendMessage} disabled={isLoading} className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50">
             Send
           </button>
         </div>
