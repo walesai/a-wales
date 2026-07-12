@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.10",
+    "@stripe/stripe-js": "^9.9.0",
     "lucide-react": "^1.24.0",
-    "next": "16.2.10",
+    "next": "^9.3.3",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "stripe": "^22.3.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
