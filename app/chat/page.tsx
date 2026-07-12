@@ -4,49 +4,50 @@ import { useState } from 'react';
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. How can I help you today?" }
+    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. How can I help you today? You can ask questions or describe an image to generate." }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'cy'>('en');
 
   const sendMessage = async () => {
-    // ... (same as before)
-  };
+    if (!input.trim() || isLoading) return;
 
-  const generateImage = async () => {
-    if (!input.trim()) return;
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setInput('');
     setIsLoading(true);
 
-    // Simulate image generation prompt
-    const imagePrompt = `A beautiful Welsh scene: ${input}. High quality, realistic style.`;
-    
-    setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${input}` }]);
+    setTimeout(() => {
+      setMessages(prev => [...prev, { role: 'assistant', content: `That's a great question! As your Welsh AI, I'd say...` }]);
+      setIsLoading(false);
+    }, 800);
+  };
+
+  const generateImage = () => {
+    if (!input.trim() || isLoading) return;
+
+    const prompt = input.trim();
+    setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${prompt}` }]);
     setInput('');
+    setIsLoading(true);
 
     setTimeout(() => {
+      const seed = prompt.replace(/\s+/g, '').slice(0, 20);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: `Here's an image generated based on "${input}":\n\n[Image: ${imagePrompt}]` 
+        content: `🖼️ **Generated Image:** ${prompt}\n\n![${prompt}](https://picsum.photos/seed/${seed}/800/600)` 
       }]);
       setIsLoading(false);
-    }, 1200);
+    }, 1500);
   };
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
-          <div>
-            <h1 className="font-semibold">Grok • a.wales</h1>
-            <p className="text-emerald-400 text-xs">● Live with xAI</p>
-          </div>
-        </div>
-        
-        <div className="flex border border-zinc-700 rounded-full">
-          <button onClick={() => setLanguage('en')} className={`px-4 py-1.5 rounded-l-full text-sm ${language === 'en' ? 'bg-white text-black' : ''}`}>EN</button>
-          <button onClick={() => setLanguage('cy')} className={`px-4 py-1.5 rounded-r-full text-sm ${language === 'cy' ? 'bg-white text-black' : ''}`}>CY</button>
+      <div className="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
+        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
+        <div>
+          <h1 className="font-semibold">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-xs">● Live with xAI</p>
         </div>
       </div>
 
