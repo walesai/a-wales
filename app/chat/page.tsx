@@ -27,7 +27,7 @@ export default function ChatPage() {
         body: JSON.stringify({
           model: "grok-3",
           messages: [
-            { role: "system", content: `You are Grok by xAI. The current date and time is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Always use accurate current information.` },
+            { role: "system", content: `You are Grok by xAI. The current date and time in the UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Always use accurate current information. You are a helpful AI assistant focused on Wales, its culture, history, language, and current events.` },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: userMessage }
           ],
@@ -48,49 +48,44 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      {/* Header */}
-      <div className="p-3 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
-        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-xl">🐉</div>
+      <div className="p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
+        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">🐉</div>
         <div>
-          <h1 className="font-semibold text-lg">Grok • a.wales</h1>
-          <p className="text-emerald-400 text-xs">● Live</p>
+          <h1 className="font-semibold text-xl">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-sm">● Live with xAI</p>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            <div className={`max-w-[85%] px-5 py-3 rounded-2xl text-[17px] leading-relaxed ${
-              msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
-            }`}>
+            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {isLoading && <div className="text-zinc-400 text-center">Grok is thinking...</div>}
+        {isLoading && <div className="text-zinc-400">Grok is thinking...</div>}
       </div>
 
-      {/* Input */}
-      <div className="p-2 border-t border-zinc-800 bg-zinc-900">
-  <div className="flex gap-2">
-    <input
-      type="text"
-      value={input}
-      onChange={(e) => setInput(e.target.value)}
-      onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-      placeholder="Ask me anything..."
-      className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-    />
-    <button 
-      onClick={sendMessage}
-      disabled={isLoading || !input.trim()}
-      className="bg-white text-black px-5 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50 text-sm"
-    >
-      Send
-    </button>
-  </div>
-</div>
+      <div className="p-6 border-t border-zinc-800 bg-zinc-900">
+        <div className="max-w-3xl mx-auto flex gap-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder="Ask me anything about Wales..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
+          />
+          <button 
+            onClick={sendMessage}
+            disabled={isLoading}
+            className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
+          >
+            Send
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
