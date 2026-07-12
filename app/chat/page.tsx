@@ -25,7 +25,7 @@ export default function ChatPage() {
           'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'
         },
         body: JSON.stringify({
-          model: "grok-3",
+          model: "grok-4.3",
           messages: [
             { role: "system", content: `You are Grok by xAI. The current date and time in the UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Always use accurate current information. You are a helpful AI assistant focused on Wales, its culture, history, language, and current events.` },
             ...messages.map(m => ({ role: m.role, content: m.content })),
