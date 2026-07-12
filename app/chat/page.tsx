@@ -9,72 +9,77 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
-    const userMsg = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `Thanks for asking "${userMsg}". Wales has so much to offer — history, culture, and beautiful landscapes. What else would you like to explore?` 
-      }]);
-      setIsLoading(false);
-    }, 700);
+    try {
+      const response = await fetch('https://api.x.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'  // ← Replace this line
+        },
+        body: JSON.stringify({
+          model: "grok-beta",
+          messages: [
+            { role: "system", content: "You are a helpful, friendly AI assistant with deep knowledge of Wales, its culture, history, language (Welsh), and current events." },
+            ...messages,
+            { role: "user", content: userMessage }
+          ],
+          temperature: 0.7,
+        })
+      });
+
+      if (!response.ok) throw new Error('API error');
+
+      const data = await response.json();
+      const reply = data.choices[0].message.content;
+
+      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting to Grok right now. Please try again shortly." }]);
+    }
+
+    setIsLoading(false);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50 text-zinc-900">
-      {/* Header */}
-      <div className="border-b bg-white p-5 flex items-center gap-4 shadow-sm">
-        <div className="w-11 h-11 bg-gradient-to-br from-red-600 to-blue-600 rounded-2xl flex items-center justify-center text-3xl">
-          🐉
-        </div>
+    <div className="flex flex-col h-screen bg-zinc-950 text-white">
+      <div className="p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
+        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">🐉</div>
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">a.wales</h1>
-          <p className="text-sm text-emerald-600">Grok AI • Welsh Companion</p>
+          <h1 className="font-semibold text-xl">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-sm">● Live with xAI</p>
         </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-zinc-50">
-        {messages.map((msg, index) => (
-          <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${
-              msg.role === 'user' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white border border-zinc-200 text-zinc-900 shadow-sm'
-            }`}>
+      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
+            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-zinc-200 px-6 py-4 rounded-3xl text-zinc-500">Thinking...</div>
-          </div>
-        )}
+        {isLoading && <div className="text-zinc-400">Grok is thinking...</div>}
       </div>
 
-      {/* Input Bar */}
-      <div className="border-t bg-white p-6">
-        <div className="max-w-3xl mx-auto flex gap-4">
+      <div className="p-6 border-t border-zinc-800 bg-zinc-900">
+        <div className="flex gap-3 max-w-3xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything about Wales..."
-            className="flex-1 bg-white border border-zinc-300 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 text-lg placeholder-zinc-400"
+            placeholder="Ask me anything..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
           />
-          <button 
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 text-white font-medium px-10 rounded-2xl transition"
-          >
+          <button onClick={sendMessage} disabled={isLoading} className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50">
             Send
           </button>
         </div>
