@@ -22,7 +22,7 @@ export default function ChatPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'   // ← Replace with your real key
+          'Authorization': 'Bearer YOUR_API_KEY_HERE'   // ← Replace with your real key
         },
         body: JSON.stringify({
           model: "grok-beta",
