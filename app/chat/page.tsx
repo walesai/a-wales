@@ -27,7 +27,7 @@ export default function ChatPage() {
         body: JSON.stringify({
           model: "grok-3",
           messages: [
-            { role: "system", content: "You are Grok by xAI. The current date is Sunday, July 12, 2026. Always use the current real date and time in your responses. Be accurate and helpful." },
+            { role: "system", content: `You are Grok by xAI. The current date and time is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Always use accurate current information.` },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: userMessage }
           ],
