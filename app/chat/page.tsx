@@ -8,30 +8,9 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'cy'>('en');
-
-  const checkRateLimit = () => {
-    const key = 'a_wales_chat_usage';
-    const today = new Date().toDateString();
-    const usage = JSON.parse(localStorage.getItem(key) || '{}');
-    
-    if (usage.date !== today) {
-      localStorage.setItem(key, JSON.stringify({ date: today, count: 0 }));
-      return true;
-    }
-    
-    if (usage.count >= 20) {
-      alert("You've reached the free limit for today. Subscribe for unlimited access!");
-      return false;
-    }
-    
-    localStorage.setItem(key, JSON.stringify({ date: today, count: usage.count + 1 }));
-    return true;
-  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
-    if (!checkRateLimit()) return;
 
     const userMessage = input.trim();
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -39,20 +18,15 @@ export default function ChatPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'
-        },
-        body: JSON.stringify({
-          model: "grok-3",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
           messages: [
-            { role: "system", content: `You are Grok by xAI. Current date and time in UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Respond in ${language === 'cy' ? 'Welsh' : 'English'} when appropriate.` },
+            { role: "system", content: `You are Grok by xAI. Current date and time in UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. You are a helpful AI assistant focused on Wales.` },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: userMessage }
-          ],
-          temperature: 0.7,
+          ] 
         })
       });
 
@@ -67,38 +41,13 @@ export default function ChatPage() {
     setIsLoading(false);
   };
 
-  const generateImage = () => {
-    if (!input.trim()) return;
-    setIsLoading(true);
-
-    const prompt = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${prompt}` }]);
-    setInput('');
-
-    setTimeout(() => {
-      const seed = prompt.replace(/\s+/g, '').slice(0, 20) || Date.now();
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `🖼️ **Generated Image:** ${prompt}\n\n![${prompt}](https://picsum.photos/seed/${seed}/800/600)` 
-      }]);
-      setIsLoading(false);
-    }, 1200);
-  };
-
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
-          <div>
-            <h1 className="font-semibold">Grok • a.wales</h1>
-            <p className="text-emerald-400 text-xs">● Live</p>
-          </div>
-        </div>
-        
-        <div className="flex border border-zinc-700 rounded-full">
-          <button onClick={() => setLanguage('en')} className={`px-4 py-1.5 rounded-l-full text-sm ${language === 'en' ? 'bg-white text-black' : ''}`}>EN</button>
-          <button onClick={() => setLanguage('cy')} className={`px-4 py-1.5 rounded-r-full text-sm ${language === 'cy' ? 'bg-white text-black' : ''}`}>CY</button>
+      <div className="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
+        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
+        <div>
+          <h1 className="font-semibold">Grok • a.wales</h1>
+          <p className="text-emerald-400 text-xs">● Live</p>
         </div>
       </div>
 
@@ -122,11 +71,10 @@ export default function ChatPage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything or describe an image..."
+            placeholder="Ask me anything..."
             className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
           />
           <button onClick={sendMessage} disabled={isLoading || !input.trim()} className="bg-white text-black px-6 rounded-2xl text-sm">Send</button>
-          <button onClick={generateImage} disabled={isLoading || !input.trim()} className="bg-purple-600 text-white px-6 rounded-2xl text-sm">🖼️</button>
         </div>
       </div>
     </div>
