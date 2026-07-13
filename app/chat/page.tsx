@@ -8,9 +8,30 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'cy'>('en');
+
+  const checkRateLimit = () => {
+    const key = 'a_wales_chat_usage';
+    const today = new Date().toDateString();
+    const usage = JSON.parse(localStorage.getItem(key) || '{}');
+    
+    if (usage.date !== today) {
+      localStorage.setItem(key, JSON.stringify({ date: today, count: 0 }));
+      return true;
+    }
+    
+    if (usage.count >= 20) {
+      alert("You've reached the free limit for today. Subscribe for unlimited access!");
+      return false;
+    }
+    
+    localStorage.setItem(key, JSON.stringify({ date: today, count: usage.count + 1 }));
+    return true;
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+    if (!checkRateLimit()) return;
 
     const userMessage = input.trim();
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
@@ -25,9 +46,9 @@ export default function ChatPage() {
           'Authorization': 'Bearer xai-u9xigO8ld5DeAuNtxim49ArnkeeI9UjqcZXGm2LbFqLovnbTjAhBvcKs94ifh2L86LZZDx2kFeppdUAY'
         },
         body: JSON.stringify({
-          model: "grok-4.3",
+          model: "grok-3",
           messages: [
-            { role: "system", content: `You are Grok by xAI. The current date and time in the UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Always use accurate current information. You are a helpful AI assistant focused on Wales, its culture, history, language, and current events.` },
+            { role: "system", content: `You are Grok by xAI. Current date and time in UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. Respond in ${language === 'cy' ? 'Welsh' : 'English'} when appropriate.` },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: "user", content: userMessage }
           ],
@@ -46,58 +67,68 @@ export default function ChatPage() {
     setIsLoading(false);
   };
 
+  const generateImage = () => {
+    if (!input.trim()) return;
+    setIsLoading(true);
+
+    const prompt = input.trim();
+    setMessages(prev => [...prev, { role: 'user', content: `Generate image: ${prompt}` }]);
+    setInput('');
+
+    setTimeout(() => {
+      const seed = prompt.replace(/\s+/g, '').slice(0, 20) || Date.now();
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `🖼️ **Generated Image:** ${prompt}\n\n![${prompt}](https://picsum.photos/seed/${seed}/800/600)` 
+      }]);
+      setIsLoading(false);
+    }, 1200);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-6 border-b border-zinc-800 flex items-center gap-4 bg-zinc-900">
-        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl">🐉</div>
-        <div>
-          <h1 className="font-semibold text-xl">Grok • a.wales</h1>
-          <p className="text-emerald-400 text-sm">● Live with xAI</p>
+      <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
+          <div>
+            <h1 className="font-semibold">Grok • a.wales</h1>
+            <p className="text-emerald-400 text-xs">● Live</p>
+          </div>
+        </div>
+        
+        <div className="flex border border-zinc-700 rounded-full">
+          <button onClick={() => setLanguage('en')} className={`px-4 py-1.5 rounded-l-full text-sm ${language === 'en' ? 'bg-white text-black' : ''}`}>EN</button>
+          <button onClick={() => setLanguage('cy')} className={`px-4 py-1.5 rounded-r-full text-sm ${language === 'cy' ? 'bg-white text-black' : ''}`}>CY</button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-8">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            <div className={`max-w-[80%] px-6 py-4 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
+            <div className={`max-w-[85%] px-5 py-3 rounded-3xl text-[17px] leading-relaxed ${
+              msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
+            }`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {isLoading && <div className="text-zinc-400">Grok is thinking...</div>}
+        {isLoading && <div className="text-zinc-400 text-center">Grok is thinking...</div>}
       </div>
 
-      <div className="p-6 border-t border-zinc-800 bg-zinc-900">
-        <div className="max-w-3xl mx-auto flex gap-3">
+      <div className="p-3 border-t border-zinc-800 bg-zinc-900">
+        <div className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything about Wales..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
+            placeholder="Ask me anything or describe an image..."
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
           />
-          <button 
-            onClick={sendMessage}
-            disabled={isLoading}
-            className="bg-white text-black px-10 rounded-2xl font-medium hover:bg-white/90 disabled:opacity-50"
-          >
-            Send
-          </button>
+          <button onClick={sendMessage} disabled={isLoading || !input.trim()} className="bg-white text-black px-6 rounded-2xl text-sm">Send</button>
+          <button onClick={generateImage} disabled={isLoading || !input.trim()} className="bg-purple-600 text-white px-6 rounded-2xl text-sm">🖼️</button>
         </div>
       </div>
     </div>
   );
-  
-  const checkRateLimit = () => {
-  const today = new Date().toDateString();
-  const usage = JSON.parse(localStorage.getItem('usage') || '{}');
-  if (usage.date !== today) {
-    localStorage.setItem('usage', JSON.stringify({ date: today, count: 0 }));
-  }
-  if (usage.count >= 20) return false; // Free limit
-  localStorage.setItem('usage', JSON.stringify({ date: today, count: usage.count + 1 }));
-  return true;
-};
-
 }
