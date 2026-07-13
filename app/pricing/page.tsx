@@ -2,19 +2,23 @@
 
 export default function PricingPage() {
   const handleCheckout = async (plan: string) => {
-  try {
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan }),
-    });
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
 
-    const { url } = await response.json();
-    if (url) window.location.href = url;
-  } catch (error) {
-    alert('Error creating checkout session');
-  }
-};
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Error: No checkout URL received');
+      }
+    } catch (error) {
+      alert('Error connecting to payment system. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white py-24 px-6">
@@ -45,7 +49,7 @@ export default function PricingPage() {
               <li>✓ Bilingual (EN/CY)</li>
               <li>✓ Priority responses</li>
             </ul>
-            <button onClick={() => handleCheckout('monthly')} className="...">Subscribe Monthly</button>
+            <button onClick={() => handleCheckout('monthly')} className="block w-full py-4 bg-white text-black rounded-2xl font-medium">Subscribe Monthly</button>
           </div>
 
           <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-700">
@@ -57,7 +61,7 @@ export default function PricingPage() {
               <li>✓ Best value</li>
               <li>✓ Early access to new features</li>
             </ul>
-            <button onClick={() => handleCheckout('annual')} className="...">Subscribe Annually</button>
+            <button onClick={() => handleCheckout('annual')} className="block w-full py-4 border border-zinc-600 rounded-2xl font-medium text-white">Subscribe Annually</button>
           </div>
         </div>
       </div>
