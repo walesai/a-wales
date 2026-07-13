@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.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!);
 
 export async function POST(request: Request) {
-  const { plan } = await request.json();
-
   try {
+    const { plan } = await request.json();
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -23,9 +23,10 @@ export async function POST(request: Request) {
       success_url: `${process.env.NEXT_PUBLIC_URL}/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing`,
     });
-// hiya
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
+    console.error('Stripe error:', error);
     return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
   }
 }
