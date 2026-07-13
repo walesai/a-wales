@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.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!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: Request) {
   try {
