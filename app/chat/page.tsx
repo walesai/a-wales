@@ -1,81 +1,121 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
-export default function ChatPage() {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Bore da! I'm Grok, your AI companion for Wales. How can I help you today?" }
-  ]);
+export default function Chat() {
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Check subscription status
+  useEffect(() => {
+    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    setIsSubscribed(subscribed);
+
+    // Welcome message
+    setMessages([{
+      role: 'assistant',
+      content: subscribed 
+        ? "🐉 Welcome back to a.wales Premium! How can I help you today?"
+        : "👋 Welcome to a.wales!\n\nThis is the **Free tier**. Upgrade for unlimited access."
+    }]);
+  }, []);
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || loading) return;
 
-    const userMessage = input.trim();
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          messages: [
-            { role: "system", content: `You are Grok by xAI. Current date and time in UK is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}. You are a helpful AI assistant focused on Wales.` },
-            ...messages.map(m => ({ role: m.role, content: m.content })),
-            { role: "user", content: userMessage }
-          ] 
-        })
+          message: input,
+          isSubscribed 
+        }),
       });
 
-      const data = await response.json();
-      const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+      if (!res.ok) throw new Error('API error');
 
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || data.message }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "I'm having trouble connecting to Grok. Please try again." }]);
+      console.error(error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "Sorry, I'm having trouble connecting. Please try again." 
+      }]);
+    } finally {
+      setLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-950 text-white">
-      <div className="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
-        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-2xl">🐉</div>
-        <div>
-          <h1 className="font-semibold">Grok • a.wales</h1>
-          <p className="text-emerald-400 text-xs">● Live</p>
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
+      <header className="border-b border-zinc-800 p-4 flex justify-between items-center bg-zinc-900">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">🐉</span>
+          <h1 className="text-2xl font-bold">a.wales AI</h1>
+          {isSubscribed && <span className="text-green-400 text-sm font-medium">Premium</span>}
         </div>
-      </div>
+        
+        <div className="flex items-center gap-4">
+          {!isSubscribed && (
+            <Link href="/pricing" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl font-medium transition">
+              Upgrade Now
+            </Link>
+          )}
+          <Link href="/" className="px-5 py-2 border border-zinc-700 rounded-xl hover:bg-zinc-800">Home</Link>
+        </div>
+      </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 p-6 overflow-auto max-w-4xl mx-auto w-full space-y-6">
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : ''}`}>
-            <div className={`max-w-[85%] px-5 py-3 rounded-3xl text-[17px] leading-relaxed ${
-              msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] p-5 rounded-3xl ${
+              msg.role === 'user' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-zinc-800 border border-zinc-700'
             }`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {isLoading && <div className="text-zinc-400 text-center">Grok is thinking...</div>}
+        {loading && <div className="text-blue-400">Thinking...</div>}
       </div>
 
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900">
-        <div className="flex gap-2">
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900">
+        <div className="max-w-4xl mx-auto flex gap-3">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything..."
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
+            placeholder={isSubscribed ? "Ask anything..." : "Upgrade to send messages"}
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+            disabled={!isSubscribed}
           />
-          <button onClick={sendMessage} disabled={isLoading || !input.trim()} className="bg-white text-black px-6 rounded-2xl text-sm">Send</button>
+          <button
+            onClick={sendMessage}
+            disabled={loading || !isSubscribed || !input.trim()}
+            className="px-10 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-2xl font-medium transition"
+          >
+            Send
+          </button>
         </div>
+        
+        {!isSubscribed && (
+          <p className="text-center text-sm text-zinc-500 mt-4">
+            Free tier is limited • <Link href="/pricing" className="text-blue-400 underline">Upgrade for full access</Link>
+          </p>
+        )}
       </div>
     </div>
   );
