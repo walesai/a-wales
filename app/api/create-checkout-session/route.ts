@@ -1,3 +1,4 @@
+// Stripe Checkout API Route - updated
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
