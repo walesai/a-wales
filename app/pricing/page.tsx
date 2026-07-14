@@ -7,7 +7,6 @@ export default function Pricing() {
 
   const handleCheckout = async (plan: 'monthly' | 'annual') => {
     setLoading(plan);
-    
     try {
       const res = await fetch('/api/create-checkout-session', {
         method: 'POST',
@@ -20,74 +19,94 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('No checkout URL received. Please check console (Option + ⌘ + J)');
-        console.error('No URL:', data);
+        alert('No checkout URL received');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Something went wrong. Check console for details.');
+      alert('Something went wrong. Please try again.');
     } finally {
       setLoading(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-5xl font-bold mb-4 text-zinc-900">Simple Pricing</h1>
-        <p className="text-xl text-zinc-600 mb-12">Choose the plan that works for you</p>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white py-16 px-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-16">
+          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-red-500 bg-clip-text text-transparent">
+            Choose Your Plan
+          </h1>
+          <p className="text-2xl text-zinc-400">Powerful AI for Wales</p>
+        </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Free Plan */}
-          <div className="bg-white p-8 rounded-2xl border border-zinc-200">
-            <h3 className="text-2xl font-semibold mb-4">Free</h3>
-            <p className="text-5xl font-bold mb-6">£0<span className="text-base font-normal">/month</span></p>
-            <ul className="space-y-3 mb-8 text-left">
-              <li>✅ Limited daily messages</li>
-              <li>✅ Basic AI chat</li>
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {/* Free */}
+          <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-8 flex flex-col">
+            <h3 className="text-3xl font-semibold mb-2">Free</h3>
+            <p className="text-6xl font-bold mb-8">£0<span className="text-xl font-normal text-zinc-400">/forever</span></p>
+            
+            <ul className="space-y-4 mb-10 flex-1 text-zinc-300">
+              <li className="flex items-center gap-3">✅ Daily message limit</li>
+              <li className="flex items-center gap-3">✅ Standard Grok AI</li>
+              <li className="flex items-center gap-3">✅ Welsh focus</li>
             </ul>
-            <a href="/chat" className="block w-full py-3 bg-zinc-800 text-white rounded-xl font-medium">
+
+            <a href="/chat" className="mt-auto block w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium transition">
               Start Free
             </a>
           </div>
 
-          {/* Monthly */}
-          <div className="bg-white p-8 rounded-2xl border-2 border-blue-600 relative">
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm px-4 py-1 rounded-full">Most Popular</div>
-            <h3 className="text-2xl font-semibold mb-4">Monthly</h3>
-            <p className="text-5xl font-bold mb-6">£4.99<span className="text-base font-normal">/month</span></p>
-            <ul className="space-y-3 mb-8 text-left">
-              <li>✅ Unlimited messages</li>
-              <li>✅ Priority responses</li>
-              <li>✅ Image generation</li>
+          {/* Monthly - Popular */}
+          <div className="bg-white text-zinc-900 rounded-3xl p-8 flex flex-col relative scale-105 shadow-2xl border-2 border-blue-500">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-full">
+              MOST POPULAR
+            </div>
+            
+            <h3 className="text-3xl font-semibold mb-2">Monthly</h3>
+            <p className="text-6xl font-bold mb-2">£4.99</p>
+            <p className="text-zinc-500 mb-8">per month</p>
+            
+            <ul className="space-y-4 mb-10 flex-1">
+              <li className="flex items-center gap-3">✅ Unlimited messages</li>
+              <li className="flex items-center gap-3">✅ Faster responses</li>
+              <li className="flex items-center gap-3">✅ Image generation</li>
+              <li className="flex items-center gap-3">✅ Priority Welsh AI</li>
             </ul>
+
             <button
               onClick={() => handleCheckout('monthly')}
               disabled={loading === 'monthly'}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium disabled:opacity-50"
+              className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold rounded-2xl text-lg transition"
             >
               {loading === 'monthly' ? 'Processing...' : 'Subscribe Monthly'}
             </button>
           </div>
 
           {/* Annual */}
-          <div className="bg-white p-8 rounded-2xl border border-zinc-200">
-            <h3 className="text-2xl font-semibold mb-4">Annual</h3>
-            <p className="text-5xl font-bold mb-6">£49<span className="text-base font-normal">/year</span></p>
-            <p className="text-green-600 font-medium mb-4">Save ~18%</p>
-            <ul className="space-y-3 mb-8 text-left">
-              <li>✅ Everything in Monthly</li>
-              <li>✅ Best value</li>
+          <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-8 flex flex-col">
+            <h3 className="text-3xl font-semibold mb-2">Annual</h3>
+            <p className="text-6xl font-bold mb-2">£49</p>
+            <p className="text-emerald-400 font-medium mb-8">Save ~18%</p>
+            
+            <ul className="space-y-4 mb-10 flex-1 text-zinc-300">
+              <li className="flex items-center gap-3">✅ Everything in Monthly</li>
+              <li className="flex items-center gap-3">✅ Best value</li>
+              <li className="flex items-center gap-3">✅ One payment per year</li>
             </ul>
+
             <button
               onClick={() => handleCheckout('annual')}
               disabled={loading === 'annual'}
-              className="w-full py-3 bg-zinc-800 hover:bg-black text-white rounded-xl font-medium disabled:opacity-50"
+              className="mt-auto w-full py-4 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-2xl text-lg transition"
             >
               {loading === 'annual' ? 'Processing...' : 'Subscribe Annually'}
             </button>
           </div>
         </div>
+
+        <p className="text-center text-zinc-500 mt-12 text-sm">
+          Cancel anytime • Secure payment via Stripe
+        </p>
       </div>
     </div>
   );
