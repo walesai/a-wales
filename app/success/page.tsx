@@ -10,9 +10,7 @@ export default function Success() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
-    if (sessionId) {
-      console.log('✅ Payment successful - Session ID:', sessionId);
-    }
+    if (sessionId) console.log('✅ Success - Session ID:', sessionId);
   }, []);
 
   const activateAccount = () => {
@@ -25,10 +23,10 @@ export default function Success() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
       
-      {/* Consistent Header */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800 w-full">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-4xl">🐉</span>
@@ -44,38 +42,40 @@ export default function Success() {
         </div>
       </header>
 
-      <div className="max-w-md text-center mt-20">
-        <div className="text-8xl mb-8">🎉</div>
-        <h1 className="text-5xl font-bold mb-4">Thank You!</h1>
-        <p className="text-2xl text-zinc-400 mb-10">Your subscription is now active</p>
+      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6">
+        <div className="max-w-md text-center">
+          <div className="text-8xl mb-8">🎉</div>
+          <h1 className="text-5xl font-bold mb-4">Thank You!</h1>
+          <p className="text-2xl text-zinc-400 mb-10">Your subscription is now active</p>
 
-        {!saved ? (
-          <div className="space-y-6">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700 focus:border-blue-500 outline-none text-lg"
-            />
-            <button
-              onClick={activateAccount}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-red-500 rounded-2xl font-semibold text-xl hover:brightness-110 transition"
-            >
-              Activate Full Access
-            </button>
-          </div>
-        ) : (
-          <div>
-            <p className="text-green-400 text-2xl mb-8">✅ Full access activated!</p>
-            <Link 
-              href="/chat" 
-              className="block w-full py-4 bg-white text-black rounded-2xl font-semibold text-xl hover:bg-zinc-100 transition"
-            >
-              Go to Chat →
-            </Link>
-          </div>
-        )}
+          {!saved ? (
+            <div className="space-y-6">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email to activate"
+                className="w-full p-5 rounded-2xl bg-zinc-900 border border-zinc-700 focus:border-blue-500 text-lg"
+              />
+              <button
+                onClick={activateAccount}
+                className="w-full py-5 bg-gradient-to-r from-blue-600 to-red-500 rounded-2xl font-semibold text-xl hover:brightness-110 transition"
+              >
+                Activate Full Access
+              </button>
+            </div>
+          ) : (
+            <div>
+              <p className="text-green-400 text-2xl mb-8">✅ Full access activated successfully!</p>
+              <Link 
+                href="/chat" 
+                className="block w-full py-5 bg-white text-black rounded-2xl font-semibold text-xl hover:bg-zinc-100 transition"
+              >
+                Go to Chat →
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
