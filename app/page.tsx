@@ -1,10 +1,12 @@
 'use client';
+import Header from '../components/Header';
 
 import Link from 'next/link';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
+      <Header />
       {/* Hero Section */}
       <div className="pt-24 pb-20 px-6 text-center">
         <div className="max-w-5xl mx-auto">

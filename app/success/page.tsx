@@ -1,5 +1,5 @@
 'use client';
-
+import Header from '../components/Header';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
@@ -26,6 +26,7 @@ export default function Success() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6 py-12">
+      <Header />
       <div className="max-w-md text-center">
         <div className="text-8xl mb-8">🐉</div>
         <h1 className="text-5xl font-bold mb-4">Welcome to a.wales Premium!</h1>

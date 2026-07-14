@@ -1,5 +1,5 @@
 'use client';
-
+import Header from '../components/Header';
 import { useState } from 'react';
 
 export default function Pricing() {
@@ -31,6 +31,7 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white py-16 px-6">
+      <Header />
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-red-500 bg-clip-text text-transparent">

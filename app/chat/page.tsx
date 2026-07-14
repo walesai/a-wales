@@ -1,5 +1,5 @@
 'use client';
-
+import Header from '../components/Header';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
@@ -47,17 +47,7 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      <header className="border-b border-zinc-800 p-4 flex justify-between items-center bg-zinc-900">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">🐉</span>
-          <h1 className="text-2xl font-bold">a.wales AI</h1>
-          {isSubscribed && <span className="text-green-400 text-sm">● Premium</span>}
-        </div>
-        <div className="flex gap-3">
-          {!isSubscribed && <Link href="/pricing" className="px-5 py-2 bg-blue-600 rounded-xl hover:bg-blue-700">Upgrade</Link>}
-          <Link href="/" className="px-5 py-2 border border-zinc-700 rounded-xl hover:bg-zinc-800">Home</Link>
-        </div>
-      </header>
+      <Header />
 
       <div className="flex-1 p-6 overflow-auto space-y-6">
         {messages.map((msg, i) => (
