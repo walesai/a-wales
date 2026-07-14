@@ -1,11 +1,13 @@
 // app/api/chat/route.ts
 import { NextResponse } from 'next/server';
 
-const XAI_API_KEY = process.env.XAI_API_KEY;
-
 export async function POST(request: Request) {
+  const XAI_API_KEY = process.env.XAI_API_KEY;
+
   if (!XAI_API_KEY) {
-    return NextResponse.json({ reply: "API key not set in Vercel." });
+    return NextResponse.json({ 
+      reply: "API key is not configured. Please check Vercel Environment Variables." 
+    });
   }
 
   try {
@@ -19,23 +21,26 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         model: "grok-beta",
-        messages: [
-          { role: "user", content: message }
-        ],
+        messages: [{ role: "user", content: message }],
         temperature: 0.7,
-        max_tokens: 600,
+        max_tokens: 700,
       }),
     });
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
 
+    if (!response.ok) {
+      console.error("API Error:", data);
+      return NextResponse.json({ reply: "Grok API error. Please try again." });
+    }
+
+    const reply = data.choices?.[0]?.message?.content || "I received your message.";
     return NextResponse.json({ reply });
 
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Chat error:", error);
     return NextResponse.json({ 
-      reply: "Sorry, Grok is having trouble right now. Please try again." 
+      reply: "Sorry, I'm having trouble connecting right now. Please try again." 
     });
   }
 }
