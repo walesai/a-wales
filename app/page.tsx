@@ -1,107 +1,91 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-export default function Chat() {
-  const [messages, setMessages] = useState<any[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const subscribed = localStorage.getItem('isSubscribed') === 'true';
-    setIsSubscribed(subscribed);
-
-    if (!subscribed) {
-      setMessages([{
-        role: 'assistant',
-        content: "Welcome to a.wales! 👋\n\nThis is the **Free tier**. Upgrade to Premium for unlimited messages and image generation."
-      }]);
-    }
-  }, []);
-
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, isSubscribed }),
-      });
-
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting right now. Please try again." }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function Home() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      {/* Header */}
-      <header className="border-b border-zinc-800 p-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">🐉</span>
-          <h1 className="text-2xl font-bold">a.wales AI</h1>
-        </div>
-        <div className="flex gap-4">
-          {!isSubscribed && (
-            <Link href="/pricing" className="px-5 py-2 bg-blue-600 rounded-xl hover:bg-blue-700 transition">
-              Upgrade to Premium
-            </Link>
-          )}
-          <Link href="/" className="px-5 py-2 border border-zinc-700 rounded-xl hover:bg-zinc-900">Home</Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
+      {/* Hero Section */}
+      <div className="pt-24 pb-20 px-6 text-center">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-8xl mb-8">🐉</div>
+          <h1 className="text-7xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-white to-red-500 bg-clip-text text-transparent">
+            a.wales
+          </h1>
+          <p className="text-3xl md:text-4xl text-zinc-400 mb-10 max-w-3xl mx-auto">
+            The smartest AI for Wales — powered by Grok
+          </p>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-auto p-6 space-y-6 max-w-3xl mx-auto w-full">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] p-4 rounded-2xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
-              {msg.content}
+          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center">
+            <Link 
+              href="/chat" 
+              className="px-12 py-5 bg-gradient-to-r from-blue-600 to-blue-700 hover:brightness-110 text-2xl font-semibold rounded-3xl transition transform hover:scale-105"
+            >
+              Start Chatting Now
+            </Link>
+            <Link 
+              href="/pricing" 
+              className="px-12 py-5 border-2 border-white/30 hover:bg-white/10 text-2xl font-semibold rounded-3xl transition"
+            >
+              View Plans
+            </Link>
+          </div>
+
+          <p className="mt-8 text-zinc-500">Free tier available • Cancel anytime</p>
+        </div>
+      </div>
+
+      {/* Features */}
+      <div className="py-20 bg-zinc-900/50">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-5xl font-bold text-center mb-16">Why Wales loves a.wales</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-10 hover:border-blue-500 transition">
+              <div className="text-5xl mb-6">🏴󠁧󠁢󠁷󠁬󠁳󠁿</div>
+              <h3 className="text-3xl font-semibold mb-4">Welsh Intelligence</h3>
+              <p className="text-zinc-400 text-lg">Local knowledge of Cardiff, Swansea, the Valleys, Welsh culture, language & current affairs.</p>
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-10 hover:border-blue-500 transition">
+              <div className="text-5xl mb-6">⚡</div>
+              <h3 className="text-3xl font-semibold mb-4">Powerful Grok AI</h3>
+              <p className="text-zinc-400 text-lg">Real-time answers, image generation, and smart conversations — upgraded on Premium.</p>
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-10 hover:border-blue-500 transition">
+              <div className="text-5xl mb-6">🔐</div>
+              <h3 className="text-3xl font-semibold mb-4">Private &amp; Secure</h3>
+              <p className="text-zinc-400 text-lg">Your chats are private. Premium unlocks unlimited usage and faster responses.</p>
             </div>
           </div>
-        ))}
-        {loading && <div className="text-zinc-400">Thinking...</div>}
+        </div>
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t border-zinc-800 bg-zinc-900">
-        <div className="max-w-3xl mx-auto flex gap-3">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isSubscribed ? "Ask me anything about Wales or the world..." : "Upgrade to continue chatting..."}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500"
-            disabled={!isSubscribed}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={loading || !isSubscribed || !input.trim()}
-            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-2xl font-medium transition"
-          >
-            Send
-          </button>
+      {/* CTA Banner */}
+      <div className="py-20 text-center border-t border-zinc-800">
+        <div className="max-w-2xl mx-auto px-6">
+          <h2 className="text-5xl font-bold mb-6">Ready to experience the best AI in Wales?</h2>
+          <div className="flex flex-col sm:flex-row gap-5 justify-center mt-10">
+            <Link 
+              href="/chat" 
+              className="px-10 py-5 bg-white text-black text-xl font-semibold rounded-3xl hover:bg-zinc-200 transition"
+            >
+              Try Free Now
+            </Link>
+            <Link 
+              href="/pricing" 
+              className="px-10 py-5 border border-white/40 text-xl font-semibold rounded-3xl hover:bg-white/10 transition"
+            >
+              See Premium Plans
+            </Link>
+          </div>
         </div>
-        {!isSubscribed && (
-          <p className="text-center text-sm text-zinc-500 mt-3">
-            Free users have limited access • <Link href="/pricing" className="text-blue-400 hover:underline">Upgrade now</Link>
-          </p>
-        )}
       </div>
+
+      <footer className="text-center py-10 text-zinc-500 border-t border-zinc-800">
+        Made for Wales • Powered by xAI Grok
+      </footer>
     </div>
   );
 }
