@@ -1,4 +1,4 @@
-// Stripe Checkout API Route - updated
+// app/api/create-checkout-session/route.ts
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
@@ -17,6 +17,9 @@ export async function POST(request: Request) {
             name: plan === 'monthly' ? 'a.wales Monthly' : 'a.wales Annual',
           },
           unit_amount: plan === 'monthly' ? 499 : 4900,
+          recurring: {
+            interval: plan === 'monthly' ? 'month' : 'year',
+          },
         },
         quantity: 1,
       }],
@@ -26,8 +29,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Stripe error:', error);
-    return NextResponse.json({ error: 'Failed to create session' }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || 'Failed to create session' 
+    }, { status: 500 });
   }
 }
