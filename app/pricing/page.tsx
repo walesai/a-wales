@@ -1,39 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default function Pricing() {
-  const [loading, setLoading] = useState<string | null>(null);
+export default function Chat() {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [remainingMessages, setRemainingMessages] = useState(10);
 
-  const handleCheckout = async (plan: 'monthly' | 'annual') => {
-    setLoading(plan);
+  // Check subscription and rate limit
+  useEffect(() => {
+    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    setIsSubscribed(subscribed);
+
+    if (!subscribed) {
+      const today = new Date().toISOString().split('T')[0];
+      const savedDate = localStorage.getItem('rateLimitDate');
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
+
+      if (savedDate !== today) {
+        count = 0;
+        localStorage.setItem('rateLimitDate', today);
+        localStorage.setItem('messageCount', '0');
+      }
+
+      setRemainingMessages(10 - count);
+    }
+
+    setMessages([{
+      role: 'assistant',
+      content: subscribed 
+        ? "🐉 Welcome back to a.wales Premium!\n\nHow can I help you today?" 
+        : "👋 Welcome to a.wales!\n\nFree tier: 10 messages per day. Upgrade for unlimited access."
+    }]);
+  }, []);
+
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+
+    // Rate limiting for free users
+    if (!isSubscribed) {
+      const today = new Date().toISOString().split('T')[0];
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
+
+      if (count >= 10) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: "You've reached your daily limit of 10 messages. Upgrade to Premium for unlimited chatting!"
+        }]);
+        return;
+      }
+
+      count++;
+      localStorage.setItem('messageCount', count.toString());
+      setRemainingMessages(10 - count);
+    }
+
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
     try {
-      const res = await fetch('/api/create-checkout-session', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ message: input }),
       });
 
       const data = await res.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert('No checkout URL received');
-      }
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (error) {
-      console.error('Error:', error);
-      alert('Something went wrong. Please try again.');
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble right now." }]);
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
-      
-      {/* Consistent Header */}
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -44,73 +91,49 @@ export default function Pricing() {
             <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
             <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
           </nav>
-          <Link href="/chat" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
-            Start Chatting
+          <Link href="/pricing" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
+            {isSubscribed ? 'Manage Plan' : 'Upgrade'}
           </Link>
         </div>
       </header>
 
-      {/* Pricing Content */}
-      <div className="pt-20 pb-16 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-red-500 bg-clip-text text-transparent">Choose Your Plan</h1>
-          <p className="text-2xl text-zinc-400 mb-12">Powerful AI for Wales</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {/* Free */}
-          <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-8 flex flex-col">
-            <h3 className="text-3xl font-semibold mb-2">Free</h3>
-            <p className="text-6xl font-bold mb-8">£0</p>
-            <ul className="space-y-4 mb-10 flex-1 text-zinc-300">
-              <li>✅ Limited daily messages</li>
-              <li>✅ Basic AI chat</li>
-            </ul>
-            <Link href="/chat" className="mt-auto block w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium">
-              Start Free
-            </Link>
-          </div>
-
-          {/* Monthly */}
-          <div className="bg-white text-zinc-900 rounded-3xl p-8 flex flex-col relative scale-105 shadow-2xl border-2 border-blue-500">
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-full">
-              MOST POPULAR
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
+        {messages.map((msg, i) => (
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[80%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
+              {msg.content}
             </div>
-            <h3 className="text-3xl font-semibold mb-2">Monthly</h3>
-            <p className="text-6xl font-bold mb-2">£4.99</p>
-            <p className="text-zinc-500 mb-8">per month</p>
-            <ul className="space-y-4 mb-10 flex-1">
-              <li>✅ Unlimited messages</li>
-              <li>✅ Faster responses</li>
-              <li>✅ Image generation</li>
-            </ul>
-            <button
-              onClick={() => handleCheckout('monthly')}
-              disabled={loading === 'monthly'}
-              className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold rounded-2xl text-lg transition"
-            >
-              {loading === 'monthly' ? 'Processing...' : 'Subscribe Monthly'}
-            </button>
           </div>
+        ))}
+        {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
+      </div>
 
-          {/* Annual */}
-          <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-8 flex flex-col">
-            <h3 className="text-3xl font-semibold mb-2">Annual</h3>
-            <p className="text-6xl font-bold mb-2">£49</p>
-            <p className="text-emerald-400 font-medium mb-8">Save ~18%</p>
-            <ul className="space-y-4 mb-10 flex-1 text-zinc-300">
-              <li>✅ Everything in Monthly</li>
-              <li>✅ Best value</li>
-            </ul>
-            <button
-              onClick={() => handleCheckout('annual')}
-              disabled={loading === 'annual'}
-              className="mt-auto w-full py-4 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-2xl text-lg transition"
-            >
-              {loading === 'annual' ? 'Processing...' : 'Subscribe Annually'}
-            </button>
-          </div>
+      <div className="p-4 border-t border-zinc-800 bg-zinc-900">
+        <div className="max-w-4xl mx-auto flex gap-3">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            placeholder={isSubscribed ? "Ask me anything..." : `Free: ${remainingMessages} messages left today`}
+            disabled={!isSubscribed && remainingMessages <= 0}
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+          />
+          <button
+            onClick={sendMessage}
+            disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
+            className="px-10 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-2xl font-medium transition"
+          >
+            Send
+          </button>
         </div>
+
+        {!isSubscribed && (
+          <p className="text-center text-sm text-zinc-500 mt-4">
+            Free tier: {remainingMessages} messages left today • 
+            <Link href="/pricing" className="text-blue-400 hover:underline ml-1">Upgrade for unlimited</Link>
+          </p>
+        )}
       </div>
     </div>
   );
