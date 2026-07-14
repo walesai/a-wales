@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${XAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "grok-2-1212",        // ← This is the most reliable model right now
+        model: "grok-3",        // ← This is the most reliable model right now
         messages: [
           { 
             role: "system", 
