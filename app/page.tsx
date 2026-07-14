@@ -8,7 +8,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
       <Header />
 
-      {/* Hero */}
+      {/* Hero Section */}
       <div className="pt-20 pb-20 px-6 text-center">
         <div className="max-w-5xl mx-auto">
           <div className="text-8xl md:text-9xl mb-8">🐉</div>
