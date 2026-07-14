@@ -8,56 +8,56 @@ export default function Success() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    // Get session_id from URL if Stripe redirected here
     const params = new URLSearchParams(window.location.search);
     const sessionId = params.get('session_id');
     if (sessionId) {
-      console.log('Payment successful - Session ID:', sessionId);
+      console.log('✅ Success - Session:', sessionId);
     }
   }, []);
 
-  const saveEmail = () => {
-    if (email) {
-      localStorage.setItem('userEmail', email);
+  const activateAccount = () => {
+    if (email.trim()) {
+      localStorage.setItem('userEmail', email.trim());
       localStorage.setItem('isSubscribed', 'true');
+      localStorage.setItem('subscriptionDate', new Date().toISOString());
       setSaved(true);
     }
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6">
+    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6 py-12">
       <div className="max-w-md text-center">
-        <div className="text-7xl mb-6">🎉</div>
-        <h1 className="text-5xl font-bold mb-4">Thank You!</h1>
-        <p className="text-2xl text-zinc-400 mb-10">Your subscription is now active</p>
+        <div className="text-8xl mb-8">🐉</div>
+        <h1 className="text-5xl font-bold mb-4">Welcome to a.wales Premium!</h1>
+        <p className="text-zinc-400 text-xl mb-10">Your subscription is active</p>
 
         {!saved ? (
-          <>
-            <p className="mb-6 text-zinc-300">Enter your email to activate full access:</p>
+          <div className="space-y-6">
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700 text-white mb-6 focus:outline-none focus:border-blue-500"
+              placeholder="Enter your email"
+              className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700 focus:border-blue-500 outline-none text-lg"
             />
             <button
-              onClick={saveEmail}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-red-600 rounded-2xl font-semibold text-lg hover:scale-105 transition"
+              onClick={activateAccount}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-red-500 rounded-2xl font-semibold text-xl hover:brightness-110 transition"
             >
-              Activate My Account
+              Activate Full Access
             </button>
-          </>
+          </div>
         ) : (
           <div>
-            <p className="text-green-400 text-xl mb-8">✅ Account activated successfully!</p>
-            <Link href="/chat" className="block w-full py-4 bg-white text-black rounded-2xl font-semibold">
-              Start Using a.wales →
+            <p className="text-green-400 text-2xl mb-8">✅ Full access activated!</p>
+            <Link 
+              href="/chat" 
+              className="block w-full py-4 bg-white text-black rounded-2xl font-semibold text-xl hover:bg-zinc-100 transition"
+            >
+              Go to Chat →
             </Link>
           </div>
         )}
-
-        <p className="mt-10 text-sm text-zinc-500">You can manage your subscription in your Stripe account anytime.</p>
       </div>
     </div>
   );
