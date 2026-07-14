@@ -5,7 +5,7 @@ const XAI_API_KEY = process.env.XAI_API_KEY;
 
 export async function POST(request: Request) {
   if (!XAI_API_KEY) {
-    return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    return NextResponse.json({ reply: "API key is not configured. Please check Vercel settings." }, { status: 500 });
   }
 
   try {
@@ -18,36 +18,34 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${XAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "grok-beta",           // or "grok-2-1212" if available
+        model: "grok-2-1212",   // More reliable model name
         messages: [
-          {
-            role: "system",
-            content: "You are a helpful, friendly AI assistant for a.wales. You have strong knowledge about Wales, Cardiff, Welsh culture, language, and current events. Be concise and engaging."
+          { 
+            role: "system", 
+            content: "You are a helpful and friendly AI for a.wales. Focus on Wales, UK, and general knowledge. Be concise and useful." 
           },
-          {
-            role: "user",
-            content: message
-          }
+          { role: "user", content: message }
         ],
         temperature: 0.7,
-        max_tokens: 800,
+        max_tokens: 700,
       }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error?.message || 'API error');
+      console.error("xAI API error:", data);
+      return NextResponse.json({ reply: "Sorry, Grok is having trouble right now. Please try again." });
     }
 
-    const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't generate a response.";
+    const reply = data.choices?.[0]?.message?.content || "I received your message but couldn't generate a reply.";
 
     return NextResponse.json({ reply });
 
-  } catch (error: any) {
-    console.error('Chat API error:', error);
+  } catch (error) {
+    console.error("Chat error:", error);
     return NextResponse.json({ 
-      reply: "Sorry, I'm having trouble connecting to Grok right now. Please try again." 
+      reply: "Connection error. Please check your internet and try again." 
     });
   }
 }
