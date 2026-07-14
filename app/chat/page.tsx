@@ -1,5 +1,5 @@
 'use client';
-import Header from '../../components/Header';
+import Header from '@/components/Header';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
