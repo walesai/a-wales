@@ -30,7 +30,7 @@ export default function Chat() {
     setMessages([{
       role: 'assistant',
       content: isWelsh 
-        ? "🐉 Croeso i a.wales Premium!" 
+        ? "🐉 Croeso i a.wales Premium! Sut alla i dy helpu heddiw?" 
         : "🐉 Welcome back to a.wales Premium!\n\nHow can I help you today?"
     }]);
   }, [isWelsh]);
@@ -97,7 +97,7 @@ export default function Chat() {
             <span className="text-3xl">🐉</span>
             <Link href="/" className="text-xl font-bold">a.wales</Link>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
@@ -118,16 +118,16 @@ export default function Chat() {
       {/* Welsh Toggle */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
         <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>🇬🇧 EN</button>
+          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600 text-white' : 'text-zinc-400'}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages Area */}
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-4 rounded-2xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
+            <div className={`max-w-[88%] p-4 rounded-2xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
               {msg.content}
             </div>
           </div>
@@ -135,22 +135,22 @@ export default function Chat() {
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
       </div>
 
-      {/* Mobile Optimized Input */}
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto flex gap-2">
+      {/* Compact Input for Flip Phone */}
+      <div className="p-2 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+        <div className="flex gap-2 max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} messages left`}
+            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-4 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[48px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
+            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[48px] text-sm"
           >
             Send
           </button>
