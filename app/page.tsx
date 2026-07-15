@@ -1,12 +1,46 @@
 'use client';
 
-import Header from '../../components/Header';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const [isWelsh, setIsWelsh] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('preferredLang') === 'cy';
+    setIsWelsh(saved);
+  }, []);
+
+  const toggleLanguage = () => {
+    const newLang = !isWelsh;
+    setIsWelsh(newLang);
+    localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
-      <Header />
+      {/* Header with Toggle */}
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">🐉</span>
+            <Link href="/" className="text-2xl font-bold hover:text-blue-400 transition">a.wales</Link>
+          </div>
+          <nav className="hidden md:flex items-center gap-8 text-base">
+            <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
+            <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
+          </nav>
+          <div className="flex items-center gap-4">
+            <button onClick={toggleLanguage} className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-2xl text-sm font-medium transition">
+              {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+            </button>
+            <Link href="/chat" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
+              Start Chatting
+            </Link>
+          </div>
+        </div>
+      </header>
 
       <div className="pt-20 pb-20 px-6 text-center">
         <div className="max-w-5xl mx-auto">
