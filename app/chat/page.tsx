@@ -135,22 +135,22 @@ export default function Chat() {
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
       </div>
 
-            {/* Ultra Compact Input for Flip Phone */}
-      <div className="p-2 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="flex gap-1.5 max-w-4xl mx-auto">
+                  {/* Ultra Compact Stacked Input for Flip Phone */}
+      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+        <div className="max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isSubscribed ? (isWelsh ? "Gofyn..." : "Ask me...") : `${remainingMessages} left`}
+            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-4 py-2.5 text-[15px] focus:outline-none focus:border-blue-500 min-h-[42px] leading-tight"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3 text-[15px] focus:outline-none focus:border-blue-500 mb-2 min-h-[46px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="px-6 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[42px] text-sm flex items-center justify-center"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3 font-medium text-sm"
           >
             Send
           </button>
