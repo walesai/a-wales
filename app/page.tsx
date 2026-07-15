@@ -19,6 +19,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
+      
+      {/* Narrow Main Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -33,17 +35,23 @@ export default function Home() {
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
-
-          <div className="flex items-center gap-4">
-            <button onClick={toggleLanguage} className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700">
-              {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
-            </button>
-            <Link href="/chat" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
-              Start Chatting
-            </Link>
-          </div>
         </div>
       </header>
+
+      {/* Secondary Bar - Toggle + Start Chatting */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex justify-end gap-4">
+          <button 
+            onClick={toggleLanguage} 
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
+          >
+            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+          </button>
+          <Link href="/chat" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
+            Start Chatting
+          </Link>
+        </div>
+      </div>
 
       <div className="pt-20 pb-24 px-6 text-center">
         <div className="max-w-5xl mx-auto">
