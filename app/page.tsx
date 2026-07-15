@@ -7,70 +7,63 @@ export default function Home() {
   const [isWelsh, setIsWelsh] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('preferredLang') === 'cy';
-    setIsWelsh(saved);
+    setIsWelsh(localStorage.getItem('preferredLang') === 'cy');
   }, []);
 
   const toggleLanguage = () => {
     const newLang = !isWelsh;
     setIsWelsh(newLang);
     localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
-    window.location.reload();   // This forces the whole site to update
+    window.location.reload();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
-      
-      {/* Header with Toggle */}
+      {/* Compact Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="text-4xl">🐉</span>
-            <Link href="/" className="text-2xl font-bold hover:text-blue-400 transition">a.wales</Link>
+            <span className="text-3xl">🐉</span>
+            <Link href="/" className="text-xl font-bold">a.wales</Link>
           </div>
-          <nav className="hidden md:flex items-center gap-8 text-base">
-            <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
-            <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
           </nav>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-2xl text-sm font-medium transition"
-            >
+          <div className="flex items-center gap-3">
+            <button onClick={toggleLanguage} className="px-4 py-2 bg-zinc-800 rounded-2xl text-sm">
               {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
             </button>
-            <Link href="/chat" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
+            <Link href="/chat" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
               Start Chatting
             </Link>
           </div>
         </div>
       </header>
 
-      <div className="pt-20 pb-20 px-6 text-center">
+      <div className="pt-16 pb-20 px-4 text-center">
         <div className="max-w-5xl mx-auto">
-          <div className="text-8xl md:text-9xl mb-8">🐉</div>
-          <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-white to-red-500 bg-clip-text text-transparent">
-            {isWelsh ? "a.wales" : "a.wales"}
+          <div className="text-7xl md:text-8xl mb-6">🐉</div>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-white to-red-500 bg-clip-text text-transparent">
+            a.wales
           </h1>
-          <p className="text-2xl md:text-4xl text-zinc-400 mb-10">
-            {isWelsh 
-              ? "Yr AI gorau ar gyfer Cymru — wedi ei bweru gan Grok" 
-              : "The smartest AI for Wales — powered by Grok"}
+          <p className="text-xl md:text-2xl text-zinc-400 mb-10 px-4">
+            {isWelsh ? "Yr AI gorau ar gyfer Cymru" : "The smartest AI for Wales — powered by Grok"}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-5 justify-center">
-            <Link href="/chat" className="px-10 py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-xl font-semibold rounded-3xl hover:brightness-110 transition">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
+            <Link href="/chat" className="px-10 py-5 bg-gradient-to-r from-blue-600 to-blue-700 text-lg font-semibold rounded-3xl hover:brightness-110 transition">
               {isWelsh ? "Dechrau Siarad" : "Start Chatting Free"}
             </Link>
-            <Link href="/pricing" className="px-10 py-5 border-2 border-white/30 hover:bg-white/10 text-xl font-semibold rounded-3xl transition">
+            <Link href="/pricing" className="px-10 py-5 border-2 border-white/30 hover:bg-white/10 text-lg font-semibold rounded-3xl transition">
               {isWelsh ? "Gweld Cynlluniau" : "View Plans"}
             </Link>
           </div>
         </div>
       </div>
 
-      <footer className="text-center py-12 text-zinc-500 border-t border-zinc-800">
-        {isWelsh ? "Wedi ei greu ar gyfer Cymru • wedi ei bweru gan xAI Grok" : "Made for Wales • Powered by xAI Grok"}
+      <footer className="text-center py-12 text-zinc-500 border-t border-zinc-800 text-sm">
+        {isWelsh ? "Wedi ei greu ar gyfer Cymru • wedi ei bweru gan xAI" : "Made for Wales • Powered by xAI Grok"}
       </footer>
     </div>
   );
