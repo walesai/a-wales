@@ -18,17 +18,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  console.log('✅ Webhook received:', event.type);
+  console.log(`✅ Webhook received: ${event.type}`);
 
+  // Handle successful checkout
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log('✅ Successful payment for:', session.customer_email);
-    // Here you could save to database in future
+    console.log('💰 Payment successful for:', session.customer_email || session.customer);
+    
+    // TODO: In future, save subscription status to database here
+    // For now, we rely on Success page activation
   }
 
+  // Handle subscription changes
   if (event.type === 'customer.subscription.created' || 
-      event.type === 'customer.subscription.updated') {
-    console.log('Subscription status updated:', event.data.object);
+      event.type === 'customer.subscription.updated' || 
+      event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object as Stripe.Subscription;
+    console.log('📋 Subscription updated:', subscription.status);
   }
 
   return NextResponse.json({ received: true });
