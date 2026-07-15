@@ -100,41 +100,39 @@ export default function Chat() {
             <Link href="/pricing">Pricing</Link>
           </nav>
 
-          <Link href="/chat" className="hidden md:block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
-            Start Chatting
-          </Link>
+          <div className="flex items-center gap-3">
+            {isSubscribed ? (
+              <button 
+                onClick={openCustomerPortal}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium"
+              >
+                Manage Plan
+              </button>
+            ) : (
+              <Link 
+                href="/pricing" 
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium"
+              >
+                Upgrade
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Secondary Bar - Toggle + Manage Plan */}
+      {/* Secondary Bar - Welsh Toggle */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex justify-end gap-3">
+        <div className="max-w-6xl mx-auto flex justify-end">
           <button 
             onClick={() => setIsWelsh(!isWelsh)} 
-            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
+            className="flex items-center gap-2 px-5 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
           >
             {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
           </button>
-
-          {isSubscribed ? (
-            <button 
-              onClick={openCustomerPortal}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium"
-            >
-              Manage Plan
-            </button>
-          ) : (
-            <Link 
-              href="/pricing" 
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium"
-            >
-              Upgrade
-            </Link>
-          )}
         </div>
       </div>
 
-      {/* Messages Area */}
+      {/* Messages */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
