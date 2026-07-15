@@ -86,26 +86,43 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      {/* Header with Welsh Red Dragon */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-            <Link href="/" className="text-xl font-bold">a.wales</Link>
+      
+      {/* Professional Header with Welsh Red Dragon */}
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
+            <div>
+              <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
+              <p className="text-xs text-zinc-500 -mt-1">Welsh AI</p>
+            </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <Link href="/chat">Chat</Link>
-            <Link href="/pricing">Pricing</Link>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
+            <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsWelsh(!isWelsh)} 
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700 transition"
+            >
+              {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+            </button>
+
             {isSubscribed ? (
-              <button onClick={openCustomerPortal} className="px-5 py-2 bg-green-600 hover:bg-green-700 rounded-xl text-sm font-medium">
+              <button 
+                onClick={openCustomerPortal}
+                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium transition"
+              >
                 Manage Plan
               </button>
             ) : (
-              <Link href="/pricing" className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium">
+              <Link 
+                href="/pricing" 
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition"
+              >
                 Upgrade
               </Link>
             )}
@@ -113,19 +130,11 @@ export default function Chat() {
         </div>
       </header>
 
-      {/* Welsh Toggle */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
-        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4">
+      {/* Messages Area */}
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[88%] p-4 rounded-2xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
+            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
               {msg.content}
             </div>
           </div>
@@ -133,9 +142,9 @@ export default function Chat() {
         {loading && <div className="text-blue-400">Thinking...</div>}
       </div>
 
-      {/* Ultra Compact Stacked Input for Flip Phone */}
+      {/* Compact Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto flex gap-2">
           <input
             type="text"
             value={input}
@@ -143,12 +152,12 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3 text-base focus:outline-none focus:border-blue-500 mb-2 min-h-[48px]"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3 font-medium"
+            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
           >
             Send
           </button>
