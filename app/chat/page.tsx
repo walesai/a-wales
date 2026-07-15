@@ -9,16 +9,14 @@ export default function Chat() {
   const [loading, setLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [remainingMessages, setRemainingMessages] = useState(10);
-  const [isWelsh, setIsWelsh] = useState(false);
 
   useEffect(() => {
-    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    let subscribed = localStorage.getItem('isSubscribed') === 'true';
     setIsSubscribed(subscribed);
 
-    const today = new Date().toISOString().split('T')[0];
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-
     if (!subscribed) {
+      const today = new Date().toISOString().split('T')[0];
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
       if (localStorage.getItem('rateLimitDate') !== today) {
         count = 0;
         localStorage.setItem('rateLimitDate', today);
@@ -29,11 +27,23 @@ export default function Chat() {
 
     setMessages([{
       role: 'assistant',
-      content: isWelsh 
-        ? "🐉 Croeso i a.wales! Sut alla i dy helpu heddiw?" 
-        : "🐉 Welcome to a.wales!\n\nFree tier: 10 messages per day."
+      content: subscribed 
+        ? "🐉 Welcome back to a.wales Premium!\n\nHow can I help you today?" 
+        : "👋 Welcome!\n\nFree tier: 10 messages per day."
     }]);
-  }, [isWelsh]);
+  }, []);
+
+  const forcePremium = () => {
+    localStorage.setItem('isSubscribed', 'true');
+    localStorage.setItem('subscriptionDate', new Date().toISOString());
+    setIsSubscribed(true);
+    setMessages([{
+      role: 'assistant',
+      content: "✅ Premium activated! You now have unlimited access."
+    }]);
+  };
+
+  // ... sendMessage function stays the same (copy from your current file)
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -41,7 +51,7 @@ export default function Chat() {
     if (!isSubscribed) {
       let count = parseInt(localStorage.getItem('messageCount') || '0');
       if (count >= 10) {
-        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: "Daily limit reached. Upgrade to Premium!" }]);
         return;
       }
       count++;
@@ -58,13 +68,13 @@ export default function Chat() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, isWelsh }),
+        body: JSON.stringify({ message: input }),
       });
 
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble right now." }]);
     } finally {
       setLoading(false);
     }
@@ -88,24 +98,6 @@ export default function Chat() {
         </div>
       </header>
 
-      {/* Welsh Toggle */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-6 py-3 flex justify-end">
-        <div className="flex items-center gap-2 bg-zinc-800 rounded-full p-1">
-          <button 
-            onClick={() => setIsWelsh(false)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition ${!isWelsh ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}
-          >
-            🇬🇧 EN
-          </button>
-          <button 
-            onClick={() => setIsWelsh(true)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition ${isWelsh ? 'bg-red-600 text-white' : 'text-zinc-400'}`}
-          >
-            🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
-          </button>
-        </div>
-      </div>
-
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -124,7 +116,7 @@ export default function Chat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} messages left`}
+            placeholder={isSubscribed ? "Ask me anything..." : `${remainingMessages} messages left`}
             disabled={!isSubscribed && remainingMessages <= 0}
             className="flex-1 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 disabled:opacity-50"
           />
@@ -136,6 +128,14 @@ export default function Chat() {
             Send
           </button>
         </div>
+
+        {!isSubscribed && (
+          <div className="text-center mt-4">
+            <button onClick={forcePremium} className="text-blue-400 underline text-sm">
+              Force Premium Access (Temporary)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
