@@ -30,8 +30,8 @@ export default function Chat() {
     setMessages([{
       role: 'assistant',
       content: isWelsh 
-        ? "🐉 Croeso i a.wales Premium! Sut alla i dy helpu heddiw?" 
-        : "🐉 Welcome back to a.wales Premium!\n\nHow can I help you today?"
+        ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
+        : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
     }]);
   }, [isWelsh]);
 
@@ -43,13 +43,9 @@ export default function Chat() {
         body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
       });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Couldn't open Manage Plan");
-      }
+      if (data.url) window.location.href = data.url;
     } catch (error) {
-      alert("Something went wrong");
+      alert("Couldn't open Manage Plan");
     }
   };
 
@@ -90,17 +86,19 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      {/* Header */}
+      {/* Header with Welsh Red Dragon */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🐉</span>
+            <span className="text-3xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
             <Link href="/" className="text-xl font-bold">a.wales</Link>
           </div>
+
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
+
           <div className="flex items-center gap-3">
             {isSubscribed ? (
               <button onClick={openCustomerPortal} className="px-5 py-2 bg-green-600 hover:bg-green-700 rounded-xl text-sm font-medium">
@@ -118,12 +116,12 @@ export default function Chat() {
       {/* Welsh Toggle */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
         <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600 text-white' : 'text-zinc-400'}`}>🇬🇧 EN</button>
-          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600 text-white' : 'text-zinc-400'}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
         </div>
       </div>
 
-      {/* Messages Area */}
+      {/* Messages */}
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -132,12 +130,12 @@ export default function Chat() {
             </div>
           </div>
         ))}
-        {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
+        {loading && <div className="text-blue-400">Thinking...</div>}
       </div>
 
-                  {/* Ultra Compact Stacked Input for Flip Phone */}
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto">
+      {/* Compact Input */}
+      <div className="p-2 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+        <div className="flex gap-2 max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
@@ -145,12 +143,12 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3 text-[15px] focus:outline-none focus:border-blue-500 mb-2 min-h-[46px]"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[48px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3 font-medium text-sm"
+            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[48px]"
           >
             Send
           </button>
