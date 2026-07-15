@@ -6,7 +6,6 @@ import Link from 'next/link';
 export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null);
   const [isWelsh, setIsWelsh] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsWelsh(localStorage.getItem('preferredLang') === 'cy');
@@ -27,15 +26,10 @@ export default function Pricing() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan }),
       });
-
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(isWelsh ? "Dim URL talu wedi derbyn" : "No checkout URL received");
-      }
+      if (data.url) window.location.href = data.url;
     } catch (error) {
-      alert(isWelsh ? "Aeth rhywbeth o'i le" : "Something went wrong. Please try again.");
+      alert(isWelsh ? "Aeth rhywbeth o'i le" : "Something went wrong");
     } finally {
       setLoading(null);
     }
@@ -44,48 +38,39 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
       
-      {/* Compact Header with Hamburger */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      {/* Narrow Main Header */}
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-            <Link href="/" className="text-xl font-bold">a.wales</Link>
+            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
+            <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
-
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={toggleLanguage} 
-              className="px-3 py-1.5 bg-zinc-800 rounded-xl text-xs font-medium"
-            >
-              {isWelsh ? 'CY' : 'EN'}
-            </button>
-
-            <Link href="/chat" className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium">
-              Start Chatting
-            </Link>
-
-            <button 
-              onClick={() => setMenuOpen(!menuOpen)} 
-              className="md:hidden text-3xl p-1"
-            >
-              ☰
-            </button>
-          </div>
         </div>
-
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="md:hidden bg-zinc-900 border-t border-zinc-800 px-4 py-5 flex flex-col gap-5 text-lg">
-            <Link href="/chat" onClick={() => setMenuOpen(false)}>Chat</Link>
-            <Link href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
-          </div>
-        )}
       </header>
+
+      {/* Secondary Bar - Toggle + Action */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3">
+        <div className="max-w-6xl mx-auto flex justify-end gap-3">
+          <button 
+            onClick={toggleLanguage} 
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
+          >
+            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+          </button>
+
+          <Link 
+            href="/chat" 
+            className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium"
+          >
+            Start Chatting
+          </Link>
+        </div>
+      </div>
 
       <div className="pt-12 pb-16 px-4">
         <div className="max-w-5xl mx-auto text-center">
