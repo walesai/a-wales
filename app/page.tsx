@@ -22,6 +22,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
       
       {/* Compact Header with Hamburger Menu */}
+            {/* Improved Compact Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -29,35 +30,43 @@ export default function Home() {
             <Link href="/" className="text-xl font-bold">a.wales</Link>
           </div>
 
+          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-6 text-sm">
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
 
-          <div className="flex items-center gap-3">
+          {/* Right Side - Toggle + Button + Hamburger */}
+          <div className="flex items-center gap-2">
             <button 
               onClick={toggleLanguage} 
-              className="px-3 py-1.5 bg-zinc-800 rounded-xl text-xs font-medium"
+              className="px-3 py-1.5 bg-zinc-800 rounded-xl text-xs font-medium hidden sm:block"
             >
               {isWelsh ? 'CY' : 'EN'}
             </button>
-            <Link href="/chat" className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium">
+
+            <Link href="/chat" className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium hidden sm:block">
               Start Chatting
             </Link>
+
+            {/* Hamburger - Always visible on mobile */}
             <button 
               onClick={() => setMenuOpen(!menuOpen)} 
-              className="md:hidden text-3xl p-1"
+              className="md:hidden text-3xl p-2 -mr-2"
             >
               ☰
             </button>
           </div>
         </div>
 
-        {/* Mobile Hamburger Menu */}
+        {/* Mobile Menu */}
         {menuOpen && (
           <div className="md:hidden bg-zinc-900 border-t border-zinc-800 px-4 py-5 flex flex-col gap-5 text-lg">
             <Link href="/chat" onClick={() => setMenuOpen(false)}>Chat</Link>
             <Link href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
+            <button onClick={toggleLanguage} className="text-left" onClick={() => setMenuOpen(false)}>
+              {isWelsh ? '🇬🇧 Switch to English' : '🏴󠁧󠁢󠁷󠁬󠁳󠁿 Switch to Welsh'}
+            </button>
           </div>
         )}
       </header>
