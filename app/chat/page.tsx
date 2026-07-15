@@ -87,48 +87,52 @@ export default function Chat() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       
-      {/* Professional Header with Welsh Red Dragon */}
+      {/* Narrow Professional Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
             <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-            <div>
-              <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
-              <p className="text-xs text-zinc-500 -mt-1">Welsh AI</p>
-            </div>
+            <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
-            <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsWelsh(!isWelsh)} 
-              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700 transition"
-            >
-              {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
-            </button>
-
-            {isSubscribed ? (
-              <button 
-                onClick={openCustomerPortal}
-                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium transition"
-              >
-                Manage Plan
-              </button>
-            ) : (
-              <Link 
-                href="/pricing" 
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition"
-              >
-                Upgrade
-              </Link>
-            )}
-          </div>
+          <Link href="/chat" className="hidden md:block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
+            Start Chatting
+          </Link>
         </div>
       </header>
+
+      {/* Secondary Bar - Toggle + Manage Plan */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3">
+        <div className="max-w-6xl mx-auto flex justify-end gap-3">
+          <button 
+            onClick={() => setIsWelsh(!isWelsh)} 
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
+          >
+            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+          </button>
+
+          {isSubscribed ? (
+            <button 
+              onClick={openCustomerPortal}
+              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium"
+            >
+              Manage Plan
+            </button>
+          ) : (
+            <Link 
+              href="/pricing" 
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium"
+            >
+              Upgrade
+            </Link>
+          )}
+        </div>
+      </div>
 
       {/* Messages Area */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
@@ -142,9 +146,9 @@ export default function Chat() {
         {loading && <div className="text-blue-400">Thinking...</div>}
       </div>
 
-      {/* Compact Input */}
+      {/* Compact Stacked Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto flex gap-2">
+        <div className="max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
@@ -152,12 +156,12 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 mb-2 min-h-[50px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
