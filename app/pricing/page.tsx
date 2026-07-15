@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Header from '../../components/Header';
 import Link from 'next/link';
 
 export default function Pricing() {
@@ -30,23 +31,7 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
-      
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-4xl">🐉</span>
-            <Link href="/" className="text-2xl font-bold hover:text-blue-400 transition">a.wales</Link>
-          </div>
-          <nav className="hidden md:flex items-center gap-8 text-base">
-            <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
-            <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
-          </nav>
-          <Link href="/chat" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
-            Start Chatting
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       <div className="pt-20 pb-16 px-6">
         <div className="max-w-5xl mx-auto text-center">
@@ -55,7 +40,6 @@ export default function Pricing() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto mt-12">
-          {/* Free */}
           <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-8 flex flex-col">
             <h3 className="text-3xl font-semibold mb-2">Free</h3>
             <p className="text-6xl font-bold mb-8">£0</p>
@@ -68,7 +52,6 @@ export default function Pricing() {
             </Link>
           </div>
 
-          {/* Monthly */}
           <div className="bg-white text-zinc-900 rounded-3xl p-8 flex flex-col relative scale-105 shadow-2xl border-2 border-blue-500">
             <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-full">
               MOST POPULAR
@@ -90,7 +73,6 @@ export default function Pricing() {
             </button>
           </div>
 
-          {/* Annual */}
           <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-8 flex flex-col">
             <h3 className="text-3xl font-semibold mb-2">Annual</h3>
             <p className="text-6xl font-bold mb-2">£49</p>
