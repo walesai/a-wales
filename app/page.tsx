@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [isWelsh, setIsWelsh] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsWelsh(localStorage.getItem('preferredLang') === 'cy');
@@ -20,26 +21,45 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
       
-      {/* Guaranteed Visible Compact Header */}
-      <header className="sticky top-0 z-50 bg-zinc-950 border-b border-zinc-800 py-3 px-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
+      {/* Compact Header with Hamburger Menu */}
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-3xl">🐉</span>
             <Link href="/" className="text-xl font-bold">a.wales</Link>
           </div>
 
-          <div className="flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-6 text-sm">
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
+          </nav>
+
+          <div className="flex items-center gap-3">
             <button 
               onClick={toggleLanguage} 
-              className="px-3 py-1 bg-zinc-800 rounded-xl text-xs"
+              className="px-3 py-1.5 bg-zinc-800 rounded-xl text-xs font-medium"
             >
               {isWelsh ? 'CY' : 'EN'}
             </button>
             <Link href="/chat" className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-sm font-medium">
               Start Chatting
             </Link>
+            <button 
+              onClick={() => setMenuOpen(!menuOpen)} 
+              className="md:hidden text-3xl p-1"
+            >
+              ☰
+            </button>
           </div>
         </div>
+
+        {/* Mobile Hamburger Menu */}
+        {menuOpen && (
+          <div className="md:hidden bg-zinc-900 border-t border-zinc-800 px-4 py-5 flex flex-col gap-5 text-lg">
+            <Link href="/chat" onClick={() => setMenuOpen(false)}>Chat</Link>
+            <Link href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
+          </div>
+        )}
       </header>
 
       <div className="pt-12 pb-20 px-4 text-center">
@@ -50,7 +70,7 @@ export default function Home() {
             The smartest AI for Wales — powered by Grok
           </p>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 px-4">
             <Link href="/chat" className="py-4 bg-blue-600 text-lg font-semibold rounded-3xl">
               Start Chatting Free
             </Link>
