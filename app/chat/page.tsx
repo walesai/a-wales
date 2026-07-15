@@ -35,6 +35,24 @@ export default function Chat() {
     }]);
   }, [isWelsh]);
 
+  const openCustomerPortal = async () => {
+  try {
+    const res = await fetch('/api/create-portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Couldn't open Manage Plan. Please try again.");
+    }
+  } catch (error) {
+    alert("Something went wrong. Please try again.");
+  }
+};
+
   const forcePremium = () => {
     localStorage.setItem('isSubscribed', 'true');
     setIsSubscribed(true);
@@ -88,20 +106,32 @@ export default function Chat() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-md border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-4xl">🐉</span>
-            <Link href="/" className="text-2xl font-bold hover:text-blue-400 transition">a.wales</Link>
-          </div>
-          <nav className="hidden md:flex items-center gap-8 text-base">
-            <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
-            <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
-          </nav>
-          <Link href="/pricing" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
-            {isSubscribed ? 'Manage Plan' : 'Upgrade'}
-          </Link>
-        </div>
-      </header>
+  <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+    <div className="flex items-center gap-3">
+      <span className="text-4xl">🐉</span>
+      <Link href="/" className="text-2xl font-bold hover:text-blue-400 transition">a.wales</Link>
+    </div>
+    <nav className="hidden md:flex items-center gap-8 text-base">
+      <Link href="/chat" className="hover:text-blue-400 transition">Chat</Link>
+      <Link href="/pricing" className="hover:text-blue-400 transition">Pricing</Link>
+    </nav>
+    
+    <div className="flex items-center gap-4">
+      {isSubscribed ? (
+        <button 
+          onClick={openCustomerPortal}
+          className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-2xl text-sm font-medium transition"
+        >
+          Manage Plan
+        </button>
+      ) : (
+        <Link href="/pricing" className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium transition">
+          Upgrade
+        </Link>
+      )}
+    </div>
+  </div>
+</header>
 
       {/* Welsh Toggle */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-6 py-3 flex justify-end">
