@@ -5,12 +5,23 @@ import { useState, useEffect } from 'react';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isWelsh, setIsWelsh] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
+    const savedLang = localStorage.getItem('preferredLang') === 'cy';
+    setIsWelsh(savedLang);
+
     const subscribed = localStorage.getItem('isSubscribed') === 'true';
     setIsSubscribed(subscribed);
   }, []);
+
+  const toggleLanguage = () => {
+    const newLang = !isWelsh;
+    setIsWelsh(newLang);
+    localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
+    window.location.reload();
+  };
 
   const openCustomerPortal = async () => {
     try {
@@ -19,15 +30,10 @@ export default function Header() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
       });
-
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert('Unable to open portal. Please try again.');
-      }
-    } catch (error) {
-      alert('Something went wrong. Please try again.');
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      alert('Unable to open portal');
     }
   };
 
@@ -45,11 +51,15 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <button 
+            onClick={toggleLanguage}
+            className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-2xl text-sm font-medium transition"
+          >
+            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+          </button>
+
           {isSubscribed ? (
-            <button 
-              onClick={openCustomerPortal}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-2xl text-sm font-medium transition"
-            >
+            <button onClick={openCustomerPortal} className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded-2xl text-sm font-medium transition">
               Manage Plan
             </button>
           ) : (
@@ -58,29 +68,16 @@ export default function Header() {
             </Link>
           )}
 
-          <button 
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden text-3xl p-2"
-          >
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-3xl p-2">
             ☰
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-zinc-800 bg-zinc-950 px-6 py-6 flex flex-col gap-6 text-lg">
-          <Link href="/chat" className="hover:text-blue-400" onClick={() => setMenuOpen(false)}>Chat</Link>
-          <Link href="/pricing" className="hover:text-blue-400" onClick={() => setMenuOpen(false)}>Pricing</Link>
-          {isSubscribed ? (
-            <button onClick={() => { openCustomerPortal(); setMenuOpen(false); }} className="bg-green-600 text-center py-4 rounded-2xl">
-              Manage Plan
-            </button>
-          ) : (
-            <Link href="/pricing" className="bg-blue-600 text-center py-4 rounded-2xl" onClick={() => setMenuOpen(false)}>
-              Upgrade
-            </Link>
-          )}
+          <Link href="/chat" onClick={() => setMenuOpen(false)}>Chat</Link>
+          <Link href="/pricing" onClick={() => setMenuOpen(false)}>Pricing</Link>
         </div>
       )}
     </header>
