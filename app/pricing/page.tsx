@@ -7,7 +7,6 @@ export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null);
   const [isWelsh, setIsWelsh] = useState(false);
 
-  // Load saved language preference
   useEffect(() => {
     const saved = localStorage.getItem('preferredLang') === 'cy';
     setIsWelsh(saved);
@@ -17,7 +16,7 @@ export default function Pricing() {
     const newLang = !isWelsh;
     setIsWelsh(newLang);
     localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
-    window.location.reload(); // Force full refresh to update all text
+    window.location.reload(); // Ensures everything updates
   };
 
   const handleCheckout = async (plan: 'monthly' | 'annual') => {
@@ -91,8 +90,8 @@ export default function Pricing() {
             <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Am Ddim" : "Free"}</h3>
             <p className="text-6xl font-bold mb-8">£0</p>
             <ul className="space-y-4 mb-12 flex-1 text-zinc-300">
-              <li>✅ 10 negeseuon y dydd</li>
-              <li>✅ Grok AI sylfaenol</li>
+              <li>✅ {isWelsh ? "10 negeseuon y dydd" : "10 messages per day"}</li>
+              <li>✅ {isWelsh ? "Grok AI sylfaenol" : "Basic Grok AI"}</li>
             </ul>
             <Link href="/chat" className="mt-auto w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium transition">
               {isWelsh ? "Dechrau Am Ddim" : "Start Free"}
@@ -108,16 +107,16 @@ export default function Pricing() {
             <p className="text-6xl font-bold mb-2">£4.99</p>
             <p className="text-zinc-500 mb-8">{isWelsh ? "y mis" : "per month"}</p>
             <ul className="space-y-4 mb-12 flex-1">
-              <li>✅ Negeseuon di-ben-draw</li>
-              <li>✅ Creu delweddau</li>
-              <li>✅ Ymatebion cyflymach</li>
+              <li>✅ {isWelsh ? "Negeseuon di-ben-draw" : "Unlimited messages"}</li>
+              <li>✅ {isWelsh ? "Creu delweddau" : "Image generation"}</li>
+              <li>✅ {isWelsh ? "Ymatebion cyflymach" : "Priority responses"}</li>
             </ul>
             <button
               onClick={() => handleCheckout('monthly')}
               disabled={loading === 'monthly'}
               className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold rounded-2xl text-lg transition"
             >
-              {loading === 'monthly' ? (isWelsh ? 'Yn prosesu...' : 'Processing...') : (isWelsh ? 'Tanysgrifio Misol' : 'Subscribe Monthly')}
+              {loading === 'monthly' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Misol' : 'Subscribe Monthly')}
             </button>
           </div>
 
@@ -127,15 +126,15 @@ export default function Pricing() {
             <p className="text-6xl font-bold mb-2">£49</p>
             <p className="text-emerald-400 font-medium mb-8">{isWelsh ? "Arbed ~18%" : "Save ~18%"}</p>
             <ul className="space-y-4 mb-12 flex-1 text-zinc-300">
-              <li>✅ Popeth yn y Misol</li>
-              <li>✅ Y gwerth gorau</li>
+              <li>✅ {isWelsh ? "Popeth yn y Misol" : "Everything in Monthly"}</li>
+              <li>✅ {isWelsh ? "Y gwerth gorau" : "Best value"}</li>
             </ul>
             <button
               onClick={() => handleCheckout('annual')}
               disabled={loading === 'annual'}
               className="mt-auto w-full py-4 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-2xl text-lg transition"
             >
-              {loading === 'annual' ? (isWelsh ? 'Yn prosesu...' : 'Processing...') : (isWelsh ? 'Tanysgrifio Blynyddol' : 'Subscribe Annually')}
+              {loading === 'annual' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Blynyddol' : 'Subscribe Annually')}
             </button>
           </div>
         </div>
