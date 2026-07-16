@@ -84,10 +84,15 @@ export default function Chat() {
     }
   };
 
+  // Simple markdown-like rendering (line breaks + bold)
+  const formatMessage = (text: string) => {
+    return text
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      
-      {/* Narrow Main Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -99,50 +104,43 @@ export default function Chat() {
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
+
+          <div className="flex items-center gap-3">
+            {isSubscribed ? (
+              <button onClick={openCustomerPortal} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
+                Manage Plan
+              </button>
+            ) : (
+              <Link href="/pricing" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
+                Upgrade
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Secondary Bar - Toggle + Manage Plan */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3">
-        <div className="max-w-6xl mx-auto flex justify-end gap-3">
-          <button 
-            onClick={() => setIsWelsh(!isWelsh)} 
-            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
-          >
-            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
-          </button>
-
-          {isSubscribed ? (
-            <button 
-              onClick={openCustomerPortal}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium"
-            >
-              Manage Plan
-            </button>
-          ) : (
-            <Link 
-              href="/pricing" 
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium"
-            >
-              Upgrade
-            </Link>
-          )}
+      {/* Welsh Toggle */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
+        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages with better formatting */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
-              {msg.content}
-            </div>
+            <div 
+              className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}
+              dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
+            />
           </div>
         ))}
-        {loading && <div className="text-blue-400">Thinking...</div>}
+        {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
       </div>
 
-      {/* Compact Stacked Input */}
+      {/* Compact Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
         <div className="max-w-4xl mx-auto">
           <input
