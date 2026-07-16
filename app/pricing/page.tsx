@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,6 +7,7 @@ export default function Pricing() {
   const [loading, setLoading] = useState<string | null>(null);
   const [isWelsh, setIsWelsh] = useState(false);
 
+  // Load saved language preference
   useEffect(() => {
     const saved = localStorage.getItem('preferredLang') === 'cy';
     setIsWelsh(saved);
@@ -17,7 +17,7 @@ export default function Pricing() {
     const newLang = !isWelsh;
     setIsWelsh(newLang);
     localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
-    window.location.reload();   // Ensures all text updates
+    window.location.reload(); // Force full refresh to update all text
   };
 
   const handleCheckout = async (plan: 'monthly' | 'annual') => {
@@ -117,7 +117,7 @@ export default function Pricing() {
               disabled={loading === 'monthly'}
               className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold rounded-2xl text-lg transition"
             >
-              {loading === 'monthly' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Misol' : 'Subscribe Monthly')}
+              {loading === 'monthly' ? (isWelsh ? 'Yn prosesu...' : 'Processing...') : (isWelsh ? 'Tanysgrifio Misol' : 'Subscribe Monthly')}
             </button>
           </div>
 
@@ -135,7 +135,7 @@ export default function Pricing() {
               disabled={loading === 'annual'}
               className="mt-auto w-full py-4 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-2xl text-lg transition"
             >
-              {loading === 'annual' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Blynyddol' : 'Subscribe Annually')}
+              {loading === 'annual' ? (isWelsh ? 'Yn prosesu...' : 'Processing...') : (isWelsh ? 'Tanysgrifio Blynyddol' : 'Subscribe Annually')}
             </button>
           </div>
         </div>
