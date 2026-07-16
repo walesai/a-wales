@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,14 +9,15 @@ export default function Pricing() {
   const [isWelsh, setIsWelsh] = useState(false);
 
   useEffect(() => {
-    setIsWelsh(localStorage.getItem('preferredLang') === 'cy');
+    const saved = localStorage.getItem('preferredLang') === 'cy';
+    setIsWelsh(saved);
   }, []);
 
   const toggleLanguage = () => {
     const newLang = !isWelsh;
     setIsWelsh(newLang);
     localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
-    window.location.reload();
+    window.location.reload();   // Ensures all text updates
   };
 
   const handleCheckout = async (plan: 'monthly' | 'annual') => {
@@ -34,7 +36,7 @@ export default function Pricing() {
         alert(isWelsh ? "Dim URL talu wedi derbyn" : "No checkout URL received");
       }
     } catch (error) {
-      alert(isWelsh ? "Aeth rhywbeth o'i le" : "Something went wrong. Please try again.");
+      alert(isWelsh ? "Aeth rhywbeth o'i le. Ceisiwch eto." : "Something went wrong. Please try again.");
     } finally {
       setLoading(null);
     }
@@ -43,7 +45,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
       
-      {/* Narrow Main Header */}
+      {/* Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -58,23 +60,20 @@ export default function Pricing() {
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
+
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={toggleLanguage} 
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
+            >
+              {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+            </button>
+            <Link href="/chat" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
+              Start Chatting
+            </Link>
+          </div>
         </div>
       </header>
-
-      {/* Secondary Bar - Toggle + Start Chatting */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex justify-end gap-4">
-          <button 
-            onClick={toggleLanguage} 
-            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
-          >
-            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
-          </button>
-          <Link href="/chat" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
-            Start Chatting
-          </Link>
-        </div>
-      </div>
 
       <div className="pt-20 pb-16 px-6">
         <div className="max-w-5xl mx-auto text-center">
