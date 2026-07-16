@@ -84,11 +84,15 @@ export default function Chat() {
     }
   };
 
-  // Simple markdown-like rendering (line breaks + bold)
+  // Better Markdown-like rendering
   const formatMessage = (text: string) => {
-    return text
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    let formatted = text
+      .replace(/\n/g, '<br>')                    // Line breaks
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')   // Bold
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Italics
+      .replace(/^- (.+)$/gm, '• $1<br>');        // Simple lists
+
+    return formatted;
   };
 
   return (
@@ -127,7 +131,7 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Messages with better formatting */}
+      {/* Messages with Markdown Support */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
