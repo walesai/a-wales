@@ -1,90 +1,144 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
-export default function PricingPage() {
-  const [lang, setLang] = useState<'en' | 'cy'>('en');
+export default function Pricing() {
+  const [loading, setLoading] = useState<string | null>(null);
+  const [isWelsh, setIsWelsh] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('lang') as 'en' | 'cy' | null;
-    if (saved) setLang(saved);
-    else if (navigator.language.startsWith('cy')) setLang('cy');
+    setIsWelsh(localStorage.getItem('preferredLang') === 'cy');
   }, []);
 
-  const toggle = (newLang: 'en' | 'cy') => {
-    setLang(newLang);
-    localStorage.setItem('lang', newLang);
+  const toggleLanguage = () => {
+    const newLang = !isWelsh;
+    setIsWelsh(newLang);
+    localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
+    window.location.reload();
   };
 
-  const t = (en: string, cy: string) => lang === 'en' ? en : cy;
+  const handleCheckout = async (plan: 'monthly' | 'annual') => {
+    setLoading(plan);
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(isWelsh ? "Dim URL talu wedi derbyn" : "No checkout URL received");
+      }
+    } catch (error) {
+      alert(isWelsh ? "Aeth rhywbeth o'i le" : "Something went wrong. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-12 prose prose-neutral">
-      {/* Header / Nav */}
-      <div className="flex justify-between items-center mb-12 border-b pb-6">
-        <div>
-          <span className="text-2xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-          <a href="/" className="text-3xl font-bold ml-3">a.wales</a>
-        </div>
-        
-        <div className="flex items-center gap-6">
-          <a href="/" className="hover:underline">Home</a>
-          <a href="/chat" className="text-red-600 hover:underline">Start Chatting</a>
-          
-          <div className="flex gap-2 border rounded-full p-1">
-            <button onClick={() => toggle('en')} className={`px-4 py-1 rounded-full ${lang === 'en' ? 'bg-black text-white' : ''}`}>
-              🇬🇧 EN
-            </button>
-            <button onClick={() => toggle('cy')} className={`px-4 py-1 rounded-full ${lang === 'cy' ? 'bg-black text-white' : ''}`}>
-              🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
+      
+      {/* Narrow Main Header */}
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
+            <div>
+              <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
+              <p className="text-xs text-zinc-500 -mt-1">Welsh AI</p>
+            </div>
           </div>
+
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* Secondary Bar - Toggle + Start Chatting */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex justify-end gap-4">
+          <button 
+            onClick={toggleLanguage} 
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
+          >
+            {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
+          </button>
+          <Link href="/chat" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
+            Start Chatting
+          </Link>
         </div>
       </div>
 
-      <h1 className="text-4xl font-bold text-center">
-        {t("Choose Your Plan", "Dewiswch eich Cynllun")}
-      </h1>
-      <p className="text-center text-xl mt-4 mb-16 text-gray-600">
-        {t("Powerful AI for Wales", "AI pwerus i Gymru")}
-      </p>
-
-      <div className="space-y-12">
-        {/* Free */}
-        <div>
-          <h2 className="text-2xl font-semibold">Free</h2>
-          <div className="text-5xl font-bold mt-3">£0</div>
-          <ul className="mt-6 space-y-2 text-lg">
-            <li>• {t("10 messages per day", "10 negeseuon y dydd")}</li>
-            <li>• {t("Basic Grok AI", "Grok AI sylfaenol")}</li>
-          </ul>
-          <a href="/chat" className="inline-block mt-6 text-blue-600 hover:underline">Start Free →</a>
+      <div className="pt-20 pb-16 px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-6xl font-bold mb-6">
+            {isWelsh ? "Dewiswch Eich Cynllun" : "Choose Your Plan"}
+          </h1>
+          <p className="text-2xl text-zinc-400">
+            {isWelsh ? "AI pwerus ar gyfer Cymru" : "Powerful AI for Wales"}
+          </p>
         </div>
 
-        {/* Monthly */}
-        <div>
-          <div className="inline-block bg-red-100 text-red-700 text-sm font-medium px-4 py-1 rounded">MOST POPULAR</div>
-          <h2 className="text-2xl font-semibold mt-4">Monthly</h2>
-          <div className="text-5xl font-bold mt-3">£4.99</div>
-          <p className="text-gray-500">per month</p>
-          <ul className="mt-6 space-y-2 text-lg">
-            <li>• {t("Unlimited messages", "Negeseuon di-ben-draw")}</li>
-            <li>• {t("Image generation", "Creu delweddau")}</li>
-            <li>• {t("Faster responses", "Ymatebion cyflymach")}</li>
-          </ul>
-          <a href="#" className="inline-block mt-6 text-blue-600 hover:underline">Subscribe Monthly →</a>
-        </div>
+        <div className="grid md:grid-cols-3 gap-8 mt-16 max-w-5xl mx-auto">
+          {/* Free */}
+          <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-10 flex flex-col">
+            <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Am Ddim" : "Free"}</h3>
+            <p className="text-6xl font-bold mb-8">£0</p>
+            <ul className="space-y-4 mb-12 flex-1 text-zinc-300">
+              <li>✅ 10 negeseuon y dydd</li>
+              <li>✅ Grok AI sylfaenol</li>
+            </ul>
+            <Link href="/chat" className="mt-auto w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium transition">
+              {isWelsh ? "Dechrau Am Ddim" : "Start Free"}
+            </Link>
+          </div>
 
-        {/* Annual */}
-        <div>
-          <h2 className="text-2xl font-semibold">Annual</h2>
-          <div className="text-5xl font-bold mt-3">£49</div>
-          <p className="text-emerald-600">Save ~18%</p>
-          <ul className="mt-6 space-y-2 text-lg">
-            <li>• {t("Everything in Monthly", "Popeth yn y Misol")}</li>
-            <li>• {t("Best value", "Y gwerth gorau")}</li>
-          </ul>
-          <a href="#" className="inline-block mt-6 text-blue-600 hover:underline">Subscribe Annually →</a>
+          {/* Monthly */}
+          <div className="bg-white text-zinc-900 rounded-3xl p-10 flex flex-col relative scale-105 shadow-2xl border-2 border-blue-500">
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-full">
+              {isWelsh ? "Mwyaf Poblogaidd" : "MOST POPULAR"}
+            </div>
+            <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Misol" : "Monthly"}</h3>
+            <p className="text-6xl font-bold mb-2">£4.99</p>
+            <p className="text-zinc-500 mb-8">{isWelsh ? "y mis" : "per month"}</p>
+            <ul className="space-y-4 mb-12 flex-1">
+              <li>✅ Negeseuon di-ben-draw</li>
+              <li>✅ Creu delweddau</li>
+              <li>✅ Ymatebion cyflymach</li>
+            </ul>
+            <button
+              onClick={() => handleCheckout('monthly')}
+              disabled={loading === 'monthly'}
+              className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold rounded-2xl text-lg transition"
+            >
+              {loading === 'monthly' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Misol' : 'Subscribe Monthly')}
+            </button>
+          </div>
+
+          {/* Annual */}
+          <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-10 flex flex-col">
+            <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Blynyddol" : "Annual"}</h3>
+            <p className="text-6xl font-bold mb-2">£49</p>
+            <p className="text-emerald-400 font-medium mb-8">{isWelsh ? "Arbed ~18%" : "Save ~18%"}</p>
+            <ul className="space-y-4 mb-12 flex-1 text-zinc-300">
+              <li>✅ Popeth yn y Misol</li>
+              <li>✅ Y gwerth gorau</li>
+            </ul>
+            <button
+              onClick={() => handleCheckout('annual')}
+              disabled={loading === 'annual'}
+              className="mt-auto w-full py-4 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-2xl text-lg transition"
+            >
+              {loading === 'annual' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Blynyddol' : 'Subscribe Annually')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
