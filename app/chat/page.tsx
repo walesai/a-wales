@@ -50,39 +50,49 @@ export default function Chat() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  if (!input.trim() || loading) return;
 
-    if (!isSubscribed) {
-      let count = parseInt(localStorage.getItem('messageCount') || '0');
-      if (count >= 10) {
-        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
-        return;
-      }
-      count++;
-      localStorage.setItem('messageCount', count.toString());
-      setRemainingMessages(10 - count);
+  if (!isSubscribed) {
+    let count = parseInt(localStorage.getItem('messageCount') || '0');
+    if (count >= 10) {
+      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
+      return;
     }
+    count++;
+    localStorage.setItem('messageCount', count.toString());
+    setRemainingMessages(10 - count);
+  }
 
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
+  const userMessage = { role: 'user', content: input };
+  setMessages(prev => [...prev, userMessage]);
+  setInput('');
+  setLoading(true);
 
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, isWelsh }),
-      });
+  try {
+    const currentDate = new Date().toLocaleString('en-GB', { 
+      timeZone: 'Europe/London',
+      dateStyle: 'full', 
+      timeStyle: 'short' 
+    });
 
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: input, 
+        isWelsh,
+        currentDate: `Current date and time in UK: ${currentDate}` 
+      }),
+    });
+
+    const data = await res.json();
+    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+  } catch (error) {
+    setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Better Markdown-like rendering
   const formatMessage = (text: string) => {
