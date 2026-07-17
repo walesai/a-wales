@@ -50,96 +50,54 @@ export default function Chat() {
   };
 
   const sendMessage = async () => {
-  if (!input.trim() || loading) return;
+    if (!input.trim() || loading) return;
 
-  if (!isSubscribed) {
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-    if (count >= 10) {
-      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
-      return;
+    if (!isSubscribed) {
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
+      if (count >= 10) {
+        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
+        return;
+      }
+      count++;
+      localStorage.setItem('messageCount', count.toString());
+      setRemainingMessages(10 - count);
     }
-    count++;
-    localStorage.setItem('messageCount', count.toString());
-    setRemainingMessages(10 - count);
-  }
 
-  const userMessage = { role: 'user', content: input };
-  setMessages(prev => [...prev, userMessage]);
-  setInput('');
-  setLoading(true);
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
 
-  try {
-    const now = new Date();
-    const ukTime = now.toLocaleString('en-GB', { 
-      timeZone: 'Europe/London',
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true 
-    });
+    try {
+      const now = new Date();
+      const ukTime = now.toLocaleString('en-GB', { 
+        timeZone: 'Europe/London',
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true 
+      });
 
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: input, 
-        isWelsh,
-        currentDateTime: `The current date and time in Wales/UK is: ${ukTime}` 
-      }),
-    });
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: input, 
+          isWelsh,
+          currentDateTime: `The current date and time in Wales/UK is: ${ukTime}` 
+        }),
+      });
 
-    const data = await res.json();
-    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-  } catch (error) {
-    setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const userMessage = { role: 'user', content: input };
-  setMessages(prev => [...prev, userMessage]);
-  setInput('');
-  setLoading(true);
-
-  try {
-    const currentDate = new Date().toLocaleString('en-GB', { 
-      timeZone: 'Europe/London',
-      dateStyle: 'full', 
-      timeStyle: 'short' 
-    });
-
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: input, 
-        isWelsh,
-        currentDate: `Current date and time in UK: ${currentDate}` 
-      }),
-    });
-
-    const data = await res.json();
-    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-  } catch (error) {
-    setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  // Better Markdown-like rendering
-  const formatMessage = (text: string) => {
-    let formatted = text
-      .replace(/\n/g, '<br>')                    // Line breaks
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')   // Bold
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Italics
-      .replace(/^- (.+)$/gm, '• $1<br>');        // Simple lists
-
-    return formatted;
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -170,7 +128,6 @@ export default function Chat() {
         </div>
       </header>
 
-      {/* Welsh Toggle */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
         <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
           <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
@@ -178,22 +135,19 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Messages with Markdown Support */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div 
-              className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}
-              dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
-            />
+            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
+              {msg.content}
+            </div>
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
       </div>
 
-      {/* Compact Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto flex gap-2">
           <input
             type="text"
             value={input}
@@ -201,12 +155,12 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 mb-2 min-h-[50px]"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
+            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
           >
             Send
           </button>
