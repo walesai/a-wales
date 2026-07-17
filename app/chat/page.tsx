@@ -76,8 +76,8 @@ export default function Chat() {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
         hour12: true 
       });
 
@@ -87,7 +87,7 @@ export default function Chat() {
         body: JSON.stringify({ 
           message: input, 
           isWelsh,
-          currentDateTime: `The current date and time in Wales/UK is: ${ukTime}` 
+          currentDateTime: `IMPORTANT: The current date and time in Wales (UK) is ${ukTime}. Use this exact time for any date or time related questions.` 
         }),
       });
 
