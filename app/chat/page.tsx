@@ -69,6 +69,43 @@ export default function Chat() {
   setLoading(true);
 
   try {
+    const now = new Date();
+    const ukTime = now.toLocaleString('en-GB', { 
+      timeZone: 'Europe/London',
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true 
+    });
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        message: input, 
+        isWelsh,
+        currentDateTime: `The current date and time in Wales/UK is: ${ukTime}` 
+      }),
+    });
+
+    const data = await res.json();
+    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+  } catch (error) {
+    setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const userMessage = { role: 'user', content: input };
+  setMessages(prev => [...prev, userMessage]);
+  setInput('');
+  setLoading(true);
+
+  try {
     const currentDate = new Date().toLocaleString('en-GB', { 
       timeZone: 'Europe/London',
       dateStyle: 'full', 
