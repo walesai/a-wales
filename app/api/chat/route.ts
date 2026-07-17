@@ -2,49 +2,45 @@
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-  const XAI_API_KEY = process.env.XAI_API_KEY;
-
-  if (!XAI_API_KEY) {
-    return NextResponse.json({ reply: "API key not configured." });
-  }
-
   try {
-    const { message } = await request.json();
+    const { message, isWelsh, currentDateTime } = await request.json();
 
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    const systemPrompt = `You are Grok, a helpful and truthful AI built by xAI.
+You are chatting on a.wales - a Welsh AI platform.
+${currentDateTime || 'Use your knowledge of current events.'}
+Always respond in ${isWelsh ? 'Welsh' : 'English'}.
+Be accurate, helpful, and witty when appropriate.`;
+
+    const res = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${XAI_API_KEY}`,
+        'Authorization': `Bearer ${process.env.XAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "grok-3",        // ← This is the most reliable model right now
+        model: 'grok-3',           // Change to 'grok-beta' if needed
         messages: [
-          { 
-            role: "system", 
-            content: "You are a helpful, friendly AI for a.wales focused on Wales and general knowledge." 
-          },
-          { role: "user", content: message }
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
         ],
         temperature: 0.7,
-        max_tokens: 700,
+        max_tokens: 1200,
       }),
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (!response.ok) {
-      console.error("xAI Error:", data);
-      return NextResponse.json({ 
-        reply: `Grok Error: ${data.error?.message || 'Bad Request'}` 
-      });
+    if (!res.ok) {
+      console.error('xAI API error:', data);
+      return NextResponse.json({ reply: "Sorry, I'm having trouble connecting right now." });
     }
 
-    const reply = data.choices?.[0]?.message?.content || "I received your message.";
+    const reply = data.choices?.[0]?.message?.content || "I couldn't generate a response.";
+
     return NextResponse.json({ reply });
 
   } catch (error) {
-    console.error("Error:", error);
-    return NextResponse.json({ reply: "Sorry, I'm having trouble right now. Please try again." });
+    console.error('Chat route error:', error);
+    return NextResponse.json({ reply: "Sorry, something went wrong on my end." });
   }
 }
