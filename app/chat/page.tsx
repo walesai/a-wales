@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function Chat() {
@@ -9,6 +9,16 @@ export default function Chat() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [remainingMessages, setRemainingMessages] = useState(10);
   const [isWelsh, setIsWelsh] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, loading]);
 
   useEffect(() => {
     const subscribed = localStorage.getItem('isSubscribed') === 'true';
@@ -135,6 +145,9 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
+        
+        {/* Auto-scroll target */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input + Send Button Below */}
