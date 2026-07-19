@@ -13,9 +13,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   useEffect(() => {
@@ -57,14 +55,6 @@ export default function Chat() {
     }
   };
 
-  const formatMessage = (text: string) => {
-    let formatted = text
-      .replace(/\n/g, '<br />')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/^\* (.+)$/gm, '• $1'); // simple bullet points
-    return formatted;
-  };
-
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
     if (!isSubscribed) {
@@ -84,24 +74,13 @@ export default function Chat() {
     setLoading(true);
 
     try {
-      const now = new Date();
-      const ukTime = now.toLocaleString('en-GB', {
-        timeZone: 'Europe/London',
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: input,
           isWelsh,
-          currentDateTime: `IMPORTANT: The current date and time in Wales (UK) is ${ukTime}. Use this exact time for any date or time related questions.`
+          currentDateTime: `IMPORTANT: The current date and time in Wales (UK) is ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}.`
         }),
       });
       const data = await res.json();
@@ -150,11 +129,7 @@ export default function Chat() {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
-              {msg.role === 'user' ? (
-                msg.content
-              ) : (
-                <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} />
-              )}
+              {msg.role === 'user' ? msg.content : msg.content.split('\n').map((line: string, idx: number) => <p key={idx}>{line}</p>)}
             </div>
           </div>
         ))}
@@ -185,10 +160,4 @@ export default function Chat() {
       </div>
     </div>
   );
-}
-
-function formatMessage(text: string) {
-  return text
-    .replace(/\n/g, '<br />')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
