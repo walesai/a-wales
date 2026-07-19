@@ -49,7 +49,7 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div>Thinking...</div>}
-      </div>
+      </div> 
 
       <div className="p-4 border-t border-zinc-800 bg-zinc-900">
         <div className="max-w-4xl mx-auto flex gap-2">
