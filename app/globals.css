@@ -1,5 +1,4 @@
-@import 'tailwindcss';
-body { font-family: 'Inter', system-ui, sans-serif; }
+@import "tailwindcss";
 
 :root {
   --background: #ffffff;
