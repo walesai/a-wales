@@ -1,168 +1,84 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
 
 export default function Chat() {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: "Hello! I'm Grok, ready to help with anything Wales-related. How can I assist you today? 🏴󠁧󠁢󠁷󠁬󠁳󠁿" }
+  ]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [remainingMessages, setRemainingMessages] = useState(10);
-  const [isWelsh, setIsWelsh] = useState(false);
-
-  useEffect(() => {
-    const subscribed = localStorage.getItem('isSubscribed') === 'true';
-    setIsSubscribed(subscribed);
-
-    const today = new Date().toISOString().split('T')[0];
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-
-    if (!subscribed) {
-      if (localStorage.getItem('rateLimitDate') !== today) {
-        count = 0;
-        localStorage.setItem('rateLimitDate', today);
-        localStorage.setItem('messageCount', '0');
-      }
-      setRemainingMessages(10 - count);
-    }
-
-    setMessages([{
-      role: 'assistant',
-      content: isWelsh 
-        ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
-        : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
-    }]);
-  }, [isWelsh]);
-
-  const openCustomerPortal = async () => {
-    try {
-      const res = await fetch('/api/create-portal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (error) {
-      alert("Couldn't open Manage Plan");
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
-
-    if (!isSubscribed) {
-      let count = parseInt(localStorage.getItem('messageCount') || '0');
-      if (count >= 10) {
-        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
-        return;
-      }
-      count++;
-      localStorage.setItem('messageCount', count.toString());
-      setRemainingMessages(10 - count);
-    }
+    if (!input.trim()) return;
 
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    setLoading(true);
+    setIsLoading(true);
 
-    try {
-      const now = new Date();
-      const ukTime = now.toLocaleString('en-GB', { 
-        timeZone: 'Europe/London',
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true 
-      });
-
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: input, 
-          isWelsh,
-          currentDateTime: `IMPORTANT: The current date and time in Wales (UK) is ${ukTime}. Use this exact time for any date or time related questions.` 
-        }),
-      });
-
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
-    } finally {
-      setLoading(false);
-    }
+    // Simulate Grok response (replace with real API call later)
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "This is a demo response. The real Grok integration will go here. What would you like to know about Wales, crypto, or anything else?"
+      }]);
+      setIsLoading(false);
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-            <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="/chat">Chat</Link>
-            <Link href="/pricing">Pricing</Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            {isSubscribed ? (
-              <button onClick={openCustomerPortal} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
-                Manage Plan
-              </button>
-            ) : (
-              <Link href="/pricing" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
-                Upgrade
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
-        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+    <div className="min-h-screen bg-[#0a0a0a] text-white flex flex-col">
+      {/* Header */}
+      <div className="border-b border-white/10 bg-black/90 backdrop-blur-xl p-4 flex items-center gap-4 fixed w-full z-50">
+        <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center font-black">A</div>
+        <div>
+          <div className="font-semibold">a.wales Chat</div>
+          <div className="text-xs text-green-400">● Online • Powered by Grok</div>
         </div>
       </div>
 
-      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
+      {/* Messages Area */}
+      <div className="flex-1 pt-20 pb-32 overflow-y-auto p-4 space-y-6 max-w-4xl mx-auto w-full">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
+            <div className={`max-w-[85%] px-5 py-4 rounded-3xl ${msg.role === 'user' 
+              ? 'bg-white text-black' 
+              : 'bg-zinc-900 border border-white/10'}`}>
               {msg.content}
             </div>
           </div>
         ))}
-        {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-zinc-900 border border-white/10 px-5 py-4 rounded-3xl">Thinking...</div>
+          </div>
+        )}
       </div>
 
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto flex gap-2">
-          <input
-            type="text"
+      {/* Input Area - Send button UNDER input */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/10 p-4">
+        <div className="max-w-4xl mx-auto">
+          <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
-            disabled={!isSubscribed && remainingMessages <= 0}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Message a.wales..."
+            rows={2}
+            className="w-full bg-zinc-900 border border-white/20 rounded-3xl px-6 py-4 text-lg resize-y min-h-[60px] focus:outline-none focus:border-violet-500"
           />
+          
           <button
             onClick={sendMessage}
-            disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
+            disabled={!input.trim() || isLoading}
+            className="mt-3 w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 py-4 rounded-3xl font-semibold text-lg disabled:opacity-50 transition hover:brightness-110"
           >
-            Send
+            {isLoading ? 'Sending...' : 'Send Message'}
           </button>
         </div>
       </div>
