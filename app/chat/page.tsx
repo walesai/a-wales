@@ -13,7 +13,9 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   useEffect(() => {
@@ -56,10 +58,11 @@ export default function Chat() {
   };
 
   const formatMessage = (text: string) => {
-    return text
+    let formatted = text
       .replace(/\n/g, '<br />')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^\* (.+)$/gm, '• $1'); // simple bullet points
+    return formatted;
   };
 
   const sendMessage = async () => {
@@ -150,20 +153,15 @@ export default function Chat() {
               {msg.role === 'user' ? (
                 msg.content
               ) : (
-                <div 
-                  className="prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} 
-                />
+                <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} />
               )}
             </div>
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
-        
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input + Send Button Below */}
       <div className="p-4 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
         <div className="max-w-4xl mx-auto">
           <input
@@ -189,10 +187,8 @@ export default function Chat() {
   );
 }
 
-// Simple formatter function
 function formatMessage(text: string) {
   return text
     .replace(/\n/g, '<br />')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
