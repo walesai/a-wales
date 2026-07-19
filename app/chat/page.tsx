@@ -129,8 +129,10 @@ export default function Chat() {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
-              {msg.role === 'user' ? msg.content : msg.content.split('\n').map((line: string, idx: number) => <p key={idx}>{line}</p>)}
-            </div>
+  {msg.role === 'user' ? msg.content : msg.content.split('\n').map((line, idx) => (
+    <p key={idx} className="mb-1">{line}</p>
+  ))}
+</div>
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
