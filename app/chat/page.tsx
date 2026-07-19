@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import ReactMarkdown from 'react-markdown';
 
 export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -140,13 +141,18 @@ export default function Chat() {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
-              {msg.content}
+              {msg.role === 'user' ? (
+                msg.content
+              ) : (
+                <ReactMarkdown className="prose prose-invert max-w-none">
+                  {msg.content}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
         
-        {/* Auto-scroll target */}
         <div ref={messagesEndRef} />
       </div>
 
