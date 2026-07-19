@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
 
 export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -54,6 +53,13 @@ export default function Chat() {
     } catch (error) {
       alert("Couldn't open Manage Plan");
     }
+  };
+
+  const formatMessage = (text: string) => {
+    return text
+      .replace(/\n/g, '<br />')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');
   };
 
   const sendMessage = async () => {
@@ -144,9 +150,10 @@ export default function Chat() {
               {msg.role === 'user' ? (
                 msg.content
               ) : (
-                <ReactMarkdown className="prose prose-invert max-w-none">
-                  {msg.content}
-                </ReactMarkdown>
+                <div 
+                  className="prose prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} 
+                />
               )}
             </div>
           </div>
@@ -180,4 +187,12 @@ export default function Chat() {
       </div>
     </div>
   );
+}
+
+// Simple formatter function
+function formatMessage(text: string) {
+  return text
+    .replace(/\n/g, '<br />')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>');
 }
