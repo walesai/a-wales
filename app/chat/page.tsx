@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 type Message = {
   role: 'user' | 'assistant' | 'system';
@@ -27,8 +25,8 @@ export default function Chat() {
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales. Respond in English unless asked otherwise."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise."
+      ? "You are a helpful, friendly AI assistant for Wales. Respond in English unless asked otherwise. Use markdown for lists, bold, code etc."
+      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown for lists, bold, code etc."
   };
 
   const sendMessage = async () => {
@@ -55,7 +53,7 @@ export default function Chat() {
 
       const data = await response.json();
 
-      if (!response.ok || !data.choices || !data.choices[0]) {
+      if (!response.ok || !data.choices?.[0]?.message?.content) {
         throw new Error(data.error || 'Failed to get response from AI');
       }
       
@@ -72,6 +70,12 @@ export default function Chat() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatMessage = (content: string) => {
+    return content.split('\n').map((line, i) => (
+      <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">{line}</p>
+    ));
   };
 
   return (
@@ -114,14 +118,14 @@ export default function Chat() {
             <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
               msg.role === 'user' 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-gray-800 prose prose-invert max-w-none'
+                : 'bg-gray-800'
             }`}>
               {msg.role === 'user' ? (
-                msg.content
+                <p className="whitespace-pre-wrap">{msg.content}</p>
               ) : (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {msg.content}
-                </ReactMarkdown>
+                <div className="prose prose-invert max-w-none">
+                  {formatMessage(msg.content)}
+                </div>
               )}
             </div>
           </div>
