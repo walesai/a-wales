@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   role: 'user' | 'assistant' | 'system';
@@ -11,7 +13,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'cy'>('en'); // EN / CY toggle
+  const [language, setLanguage] = useState<'en' | 'cy'>('en');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -22,7 +24,6 @@ export default function Chat() {
     scrollToBottom();
   }, [messages]);
 
-  // System prompt with language support
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
@@ -34,8 +35,6 @@ export default function Chat() {
     if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { role: 'user', content: input.trim() };
-    
-    // Add system prompt + previous messages + new user message
     const currentMessages = messages.length === 0 
       ? [systemPrompt, userMessage]
       : [...messages, userMessage];
@@ -54,22 +53,22 @@ export default function Chat() {
         }),
       });
 
-      if (!response.ok) throw new Error('API error');
-
       const data = await response.json();
+
+      if (!response.ok || !data.choices || !data.choices[0]) {
+        throw new Error(data.error || 'Failed to get response from AI');
+      }
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: data.choices[0].message.content 
       }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: language === 'en' 
-          ? "Sorry, something went wrong. Please try again." 
-          : "Mae'n ddrwg gen i, aeth rhywbeth o'i le. Ceisiwch eto." 
-      }]);
+      const errorMsg = language === 'en' 
+        ? "Sorry, something went wrong. Please try again." 
+        : "Mae'n ddrwg gen i, aeth rhywbeth o'i le. Ceisiwch eto.";
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +76,6 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-gray-950 text-white">
-      {/* Header with Language Toggle */}
       <div className="border-b border-gray-800 p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold">a.wales AI</h1>
@@ -87,9 +85,7 @@ export default function Chat() {
           <button
             onClick={() => setLanguage('en')}
             className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-              language === 'en' 
-                ? 'bg-blue-600 text-white' 
-                : 'hover:bg-gray-800'
+              language === 'en' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'
             }`}
           >
             🇬🇧 EN
@@ -97,9 +93,7 @@ export default function Chat() {
           <button
             onClick={() => setLanguage('cy')}
             className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-              language === 'cy' 
-                ? 'bg-blue-600 text-white' 
-                : 'hover:bg-gray-800'
+              language === 'cy' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'
             }`}
           >
             🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
@@ -107,7 +101,6 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {messages.length === 0 && (
           <div className="text-center mt-20">
@@ -120,10 +113,16 @@ export default function Chat() {
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
               msg.role === 'user' 
-                ? 'bg-blue-600' 
-                : 'bg-gray-800'
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-800 prose prose-invert max-w-none'
             }`}>
-              {msg.content}
+              {msg.role === 'user' ? (
+                msg.content
+              ) : (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.content}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}
@@ -136,7 +135,6 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-4 border-t border-gray-800 bg-gray-950">
         <div className="flex gap-3">
           <input
