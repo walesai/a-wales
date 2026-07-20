@@ -13,6 +13,7 @@ export default function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState<'en' | 'cy'>('en');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState('');
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -25,13 +26,14 @@ export default function Chat() {
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales. Respond in English unless asked otherwise. Use markdown for lists, bold, code etc."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown for lists, bold, code etc."
+      ? "You are a helpful, friendly AI assistant for Wales."
+      : "You are a helpful, friendly AI assistant for Wales."
   };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
+    setError('');
     const userMessage: Message = { role: 'user', content: input.trim() };
     const currentMessages = messages.length === 0 
       ? [systemPrompt, userMessage]
@@ -53,55 +55,38 @@ export default function Chat() {
 
       const data = await response.json();
 
-      if (!response.ok || !data.choices?.[0]?.message?.content) {
-        throw new Error(data.error || 'Failed to get response from AI');
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      if (!data.choices?.[0]?.message?.content) {
+        throw new Error('Invalid response from AI');
       }
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: data.choices[0].message.content 
       }]);
-    } catch (error: any) {
-      console.error(error);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Something went wrong');
       const errorMsg = language === 'en' 
-        ? "Sorry, something went wrong. Please try again." 
-        : "Mae'n ddrwg gen i, aeth rhywbeth o'i le. Ceisiwch eto.";
+        ? `Error: ${err.message || 'Please try again.'}` 
+        : `Gwall: ${err.message || 'Ceisiwch eto.'}`;
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const formatMessage = (content: string) => {
-    return content.split('\n').map((line, i) => (
-      <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap">{line}</p>
-    ));
-  };
-
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-gray-950 text-white">
       <div className="border-b border-gray-800 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">a.wales AI</h1>
-        </div>
+        <h1 className="text-2xl font-bold">a.wales AI</h1>
         
         <div className="flex items-center gap-2 bg-gray-900 rounded-full p-1">
-          <button
-            onClick={() => setLanguage('en')}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-              language === 'en' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'
-            }`}
-          >
-            🇬🇧 EN
-          </button>
-          <button
-            onClick={() => setLanguage('cy')}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-              language === 'cy' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'
-            }`}
-          >
-            🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
-          </button>
+          <button onClick={() => setLanguage('en')} className={`px-5 py-2 rounded-full text-sm font-medium ${language === 'en' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'}`}>🇬🇧 EN</button>
+          <button onClick={() => setLanguage('cy')} className={`px-5 py-2 rounded-full text-sm font-medium ${language === 'cy' ? 'bg-blue-600 text-white' : 'hover:bg-gray-800'}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
         </div>
       </div>
 
@@ -115,27 +100,13 @@ export default function Chat() {
 
         {messages.filter(m => m.role !== 'system').map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
-              msg.role === 'user' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-800'
-            }`}>
-              {msg.role === 'user' ? (
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-              ) : (
-                <div className="prose prose-invert max-w-none">
-                  {formatMessage(msg.content)}
-                </div>
-              )}
+            <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${msg.role === 'user' ? 'bg-blue-600' : 'bg-gray-800'}`}>
+              {msg.content}
             </div>
           </div>
         ))}
 
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-800 rounded-3xl px-6 py-4">Thinking...</div>
-          </div>
-        )}
+        {isLoading && <div className="flex justify-start"><div className="bg-gray-800 rounded-3xl px-6 py-4">Thinking...</div></div>}
         <div ref={messagesEndRef} />
       </div>
 
@@ -147,17 +118,14 @@ export default function Chat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={language === 'en' ? "Ask anything..." : "Gofyn unrhyw beth..."}
-            className="flex-1 bg-gray-900 border border-gray-700 rounded-full px-6 py-4 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500"
+            className="flex-1 bg-gray-900 border border-gray-700 rounded-full px-6 py-4 focus:outline-none focus:border-blue-500 text-white"
             disabled={isLoading}
           />
-          <button
-            onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 px-10 rounded-full font-medium transition"
-          >
+          <button onClick={sendMessage} disabled={isLoading || !input.trim()} className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 px-10 rounded-full font-medium">
             Send
           </button>
         </div>
+        {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
       </div>
     </div>
   );
