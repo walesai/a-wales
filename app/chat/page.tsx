@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   role: 'user' | 'assistant' | 'system';
@@ -25,8 +27,8 @@ export default function Chat() {
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales. Use markdown formatting for lists, **bold**, `code`, and tables when helpful."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown formatting for lists, **bold**, `code`, and tables when helpful."
+      ? "You are a helpful, friendly AI assistant for Wales. Use markdown for formatting, lists, tables, and code blocks when appropriate."
+      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown for formatting, lists, tables, and code blocks when appropriate."
   };
 
   const sendMessage = async () => {
@@ -54,7 +56,7 @@ export default function Chat() {
       const data = await response.json();
 
       if (!response.ok || !data.choices?.[0]?.message?.content) {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error(data.error || 'Failed to get response from AI');
       }
       
       setMessages(prev => [...prev, { 
@@ -70,27 +72,6 @@ export default function Chat() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Simple markdown renderer for common cases
-  const renderMessage = (content: string) => {
-    // Convert **bold** and *italic*
-    let html = content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 rounded">$1</code>');
-
-    // Convert numbered and bullet lists
-    html = html.replace(/^\d+\.\s(.+)$/gm, '<li>$1</li>');
-    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-
-    if (html.includes('<li>')) {
-      html = `<ul class="list-disc pl-5">${html}</ul>`;
-    }
-
-    return html.split('\n').map((line, i) => (
-      <p key={i} className="mb-2 last:mb-0" dangerouslySetInnerHTML={{ __html: line }} />
-    ));
   };
 
   return (
@@ -133,14 +114,14 @@ export default function Chat() {
             <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
               msg.role === 'user' 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-gray-800'
+                : 'bg-gray-800 prose prose-invert max-w-none'
             }`}>
               {msg.role === 'user' ? (
-                <p className="whitespace-pre-wrap">{msg.content}</p>
+                msg.content
               ) : (
-                <div className="prose prose-invert max-w-none">
-                  {renderMessage(msg.content)}
-                </div>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.content}
+                </ReactMarkdown>
               )}
             </div>
           </div>
