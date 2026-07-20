@@ -60,17 +60,12 @@ export default function Pricing() {
             <Link href="/pricing">Pricing</Link>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={toggleLanguage} 
-              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 rounded-2xl text-sm font-medium border border-zinc-700"
-            >
-              {isWelsh ? '🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY' : '🇬🇧 EN'}
-            </button>
-            <Link href="/chat" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
-              Start Chatting
-            </Link>
-          </div>
+          <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
+        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+        </div>
+      </div>
         </div>
       </header>
 
