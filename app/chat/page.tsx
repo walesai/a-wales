@@ -25,8 +25,8 @@ export default function Chat() {
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales. Respond in English unless asked otherwise."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise."
+      ? "You are a helpful, friendly AI assistant for Wales. Use markdown formatting for lists, **bold**, `code`, and tables when helpful."
+      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown formatting for lists, **bold**, `code`, and tables when helpful."
   };
 
   const sendMessage = async () => {
@@ -72,6 +72,27 @@ export default function Chat() {
     }
   };
 
+  // Simple markdown renderer for common cases
+  const renderMessage = (content: string) => {
+    // Convert **bold** and *italic*
+    let html = content
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 rounded">$1</code>');
+
+    // Convert numbered and bullet lists
+    html = html.replace(/^\d+\.\s(.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+
+    if (html.includes('<li>')) {
+      html = `<ul class="list-disc pl-5">${html}</ul>`;
+    }
+
+    return html.split('\n').map((line, i) => (
+      <p key={i} className="mb-2 last:mb-0" dangerouslySetInnerHTML={{ __html: line }} />
+    ));
+  };
+
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-gray-950 text-white">
       <div className="border-b border-gray-800 p-4 flex items-center justify-between">
@@ -110,9 +131,17 @@ export default function Chat() {
         {messages.filter(m => m.role !== 'system').map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
-              msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-800'
+              msg.role === 'user' 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-800'
             }`}>
-              {msg.content}
+              {msg.role === 'user' ? (
+                <p className="whitespace-pre-wrap">{msg.content}</p>
+              ) : (
+                <div className="prose prose-invert max-w-none">
+                  {renderMessage(msg.content)}
+                </div>
+              )}
             </div>
           </div>
         ))}
