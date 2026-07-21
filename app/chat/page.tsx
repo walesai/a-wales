@@ -36,13 +36,11 @@ export default function Chat() {
     }]);
   }, [isWelsh]);
 
-  // Auto-scroll to bottom
+  // Reliable Auto-Scroll
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-    useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   }, [messages, loading]);
 
   const openCustomerPortal = async () => {
@@ -93,13 +91,13 @@ export default function Chat() {
     }
   };
 
-  // Better Markdown-like rendering
+  // Markdown rendering
   const formatMessage = (text: string) => {
     let formatted = text
-      .replace(/\n/g, '<br>')                    // Line breaks
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Italics
-      .replace(/^- (.+)$/gm, '• $1<br>');        // Simple lists
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^- (.+)$/gm, '• $1<br>');
     return formatted;
   };
 
@@ -117,7 +115,6 @@ export default function Chat() {
             <Link href="/pricing">Pricing</Link>
           </nav>
 
-          {/* Desktop + Mobile Toggle + Manage Plan */}
           <div className="flex items-center gap-3">
             <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
               <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
@@ -136,7 +133,6 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* Mobile Manage Plan Button */}
         {isSubscribed && (
           <div className="md:hidden border-t border-zinc-800 bg-zinc-900 px-4 py-3 flex justify-center">
             <button onClick={openCustomerPortal} className="w-full max-w-xs py-3 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
@@ -146,7 +142,7 @@ export default function Chat() {
         )}
       </header>
 
-            {/* Messages with reliable auto-scroll */}
+      {/* Messages with Markdown + Auto-Scroll */}
       <div 
         className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
         ref={chatEndRef}
@@ -160,7 +156,7 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
-        <div ref={chatEndRef} />
+        <div ref={chatEndRef} className="h-px" />
       </div>
 
       {/* Compact Input */}
