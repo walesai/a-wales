@@ -17,7 +17,11 @@ export default function Chat() {
   useEffect(() => {
     const savedMessages = localStorage.getItem('chatHistory');
     if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
+      try {
+        setMessages(JSON.parse(savedMessages));
+      } catch (e) {
+        console.error("Failed to load chat history");
+      }
     } else {
       setMessages([{
         role: 'assistant',
