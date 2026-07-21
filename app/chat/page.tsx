@@ -181,9 +181,17 @@ export default function Chat() {
         <div ref={chatEndRef} className="h-px" />
       </div>
 
-            {/* Compact Input - Send button below for mobile */}
+             {/* Compact Input - Send button below for mobile */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <button
+              onClick={clearChat}
+              className="text-xs text-zinc-400 hover:text-white px-3 py-1"
+            >
+              Clear Chat
+            </button>
+          </div>
           <input
             type="text"
             value={input}
@@ -191,7 +199,7 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 mb-2 min-h-[52px]"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
           />
           <button
             onClick={sendMessage}
