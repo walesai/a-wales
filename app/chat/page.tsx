@@ -1,4 +1,3 @@
-// Chat memory enabled - July 21 2026
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -17,16 +16,12 @@ export default function Chat() {
   useEffect(() => {
     const savedMessages = localStorage.getItem('chatHistory');
     if (savedMessages) {
-      try {
-        setMessages(JSON.parse(savedMessages));
-      } catch (e) {
-        console.error("Failed to load chat history");
-      }
+      setMessages(JSON.parse(savedMessages));
     } else {
       setMessages([{
         role: 'assistant',
-        content: isWelsh
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!"
+        content: isWelsh 
+          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
           : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
       }]);
     }
@@ -52,11 +47,11 @@ export default function Chat() {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
 
-  // Robust Auto-Scroll
+  // Auto-scroll
   useEffect(() => {
     setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    }, 150);
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   }, [messages, loading]);
 
   const openCustomerPortal = async () => {
@@ -121,8 +116,8 @@ export default function Chat() {
       localStorage.removeItem('chatHistory');
       setMessages([{
         role: 'assistant',
-        content: isWelsh
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Sgwrs wedi clirio. Sut alla i helpu?"
+        content: isWelsh 
+          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Sgwrs wedi clirio. Sut alla i helpu?" 
           : "Chat history cleared. How can I help you?"
       }]);
     }
@@ -169,9 +164,9 @@ export default function Chat() {
         )}
       </header>
 
-      {/* Messages with Markdown + Auto-Scroll */}
+      {/* Messages */}
       <div 
-        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full pb-32"
+        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
         ref={chatEndRef}
       >
         {messages.map((msg, i) => (
@@ -183,20 +178,18 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
-        <div ref={chatEndRef} className="h-1" />
+        <div ref={chatEndRef} className="h-px" />
       </div>
 
-      {/* Fixed Bottom Input */}
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0 z-40">
-        <div className="max-w-4xl mx-auto flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <button
-              onClick={clearChat}
-              className="text-xs text-zinc-400 hover:text-white px-3 py-1"
-            >
-              Clear Chat
-            </button>
-          </div>
+      {/* Compact Input */}
+      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+        <div className="max-w-4xl mx-auto flex gap-2">
+          <button
+            onClick={clearChat}
+            className="px-4 py-3 text-xs text-zinc-400 hover:text-white"
+          >
+            Clear Chat
+          </button>
           <input
             type="text"
             value={input}
@@ -204,12 +197,12 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
+            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
           >
             Send
           </button>
