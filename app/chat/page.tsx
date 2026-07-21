@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [remainingMessages, setRemainingMessages] = useState(10);
   const [isWelsh, setIsWelsh] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Load memory
   useEffect(() => {
@@ -20,6 +23,13 @@ export default function Chat() {
   // Save memory
   useEffect(() => {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
+  }, [messages]);
+
+  // Auto-scroll
+  useEffect(() => {
+    setTimeout(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   }, [messages]);
 
   const sendMessage = async () => {
@@ -56,7 +66,7 @@ export default function Chat() {
         </div>
       </header>
 
-      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full" ref={chatEndRef}>
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
