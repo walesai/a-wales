@@ -36,11 +36,12 @@ export default function Chat() {
     }]);
   }, [isWelsh]);
 
-  // Reliable Auto-Scroll
-  useEffect(() => {
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    useEffect(() => {
+    const container = document.getElementById('chat-container');
+    const end = document.getElementById('chat-end');
+    if (container && end) {
+      end.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, loading]);
 
   const openCustomerPortal = async () => {
@@ -142,11 +143,8 @@ export default function Chat() {
         )}
       </header>
 
-      {/* Messages with Markdown + Auto-Scroll */}
-      <div 
-        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
-        ref={chatEndRef}
-      >
+            {/* Messages with forced auto-scroll */}
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full" id="chat-container">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div 
@@ -156,8 +154,10 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
-        <div ref={chatEndRef} className="h-px" />
       </div>
+
+      {/* Scroll anchor */}
+      <div id="chat-end" />
 
       {/* Compact Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
