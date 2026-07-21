@@ -122,9 +122,10 @@ export default function Chat() {
     }
   };
 
-  return (
+    return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
+        {/* Your existing header code remains unchanged */}
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
@@ -163,9 +164,9 @@ export default function Chat() {
         )}
       </header>
 
-            {/* Messages with robust auto-scroll */}
+      {/* Messages Container */}
       <div 
-        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
+        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full pb-24"
         ref={chatEndRef}
       >
         {messages.map((msg, i) => (
@@ -180,8 +181,8 @@ export default function Chat() {
         <div ref={chatEndRef} className="h-1" />
       </div>
 
-             {/* Compact Input - Send button below for mobile */}
-      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+      {/* Fixed Bottom Input */}
+      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0 z-40">
         <div className="max-w-4xl mx-auto flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <button
