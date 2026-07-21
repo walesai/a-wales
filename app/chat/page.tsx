@@ -12,29 +12,20 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load chat memory
+  // Load memory
   useEffect(() => {
     const saved = localStorage.getItem('chatHistory');
-    if (saved) {
-      setMessages(JSON.parse(saved));
-    } else {
-      setMessages([{
-        role: 'assistant',
-        content: isWelsh ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso!" : "Welcome back! How can I help?"
-      }]);
-    }
-  }, [isWelsh]);
+    if (saved) setMessages(JSON.parse(saved));
+  }, []);
 
-  // Save chat memory
+  // Save memory
   useEffect(() => {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
 
   // Auto-scroll
   useEffect(() => {
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const openCustomerPortal = async () => {
@@ -92,12 +83,9 @@ export default function Chat() {
   };
 
   const clearChat = () => {
-    if (confirm("Clear chat history?")) {
+    if (confirm("Clear chat?")) {
       localStorage.removeItem('chatHistory');
-      setMessages([{
-        role: 'assistant',
-        content: "Chat history cleared. How can I help you?"
-      }]);
+      setMessages([]);
     }
   };
 
@@ -122,11 +110,11 @@ export default function Chat() {
             </div>
 
             {isSubscribed ? (
-              <button onClick={openCustomerPortal} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium hidden md:block">
+              <button onClick={openCustomerPortal} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
                 Manage Plan
               </button>
             ) : (
-              <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium hidden md:block">
+              <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
                 Upgrade
               </Link>
             )}
@@ -142,24 +130,24 @@ export default function Chat() {
             </div>
           </div>
         ))}
-        {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
+        {loading && <div className="text-blue-400">Thinking...</div>}
       </div>
 
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
         <div className="max-w-4xl mx-auto">
-          <button onClick={clearChat} className="text-xs text-zinc-400 mb-2">Clear Chat</button>
+          <button onClick={clearChat} className="text-xs text-zinc-400 mb-2 block">Clear Chat</button>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder="Ask me anything..."
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 mb-2"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 mb-2"
           />
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
+            className="w-full bg-blue-600 hover:bg-blue-700 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
