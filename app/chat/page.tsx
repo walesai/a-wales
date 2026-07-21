@@ -140,14 +140,16 @@ export default function Chat() {
 
       
 
-      {/* Messages with Markdown Support */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
+            {/* Messages - with auto-scroll */}
+      <div 
+        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full scroll-smooth"
+        id="chat-messages"
+      >
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div 
-              className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}
-              dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
-            />
+            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
+              {msg.content}
+            </div>
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
