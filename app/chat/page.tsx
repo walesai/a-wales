@@ -1,157 +1,165 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-
-type Message = {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-};
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'cy'>('en'); // EN / CY toggle
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const [loading, setLoading] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [remainingMessages, setRemainingMessages] = useState(10);
+  const [isWelsh, setIsWelsh] = useState(false);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    setIsSubscribed(subscribed);
 
-  // System prompt with language support
-  const systemPrompt = {
-    role: 'system' as const,
-    content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales. Respond in English unless asked otherwise."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise."
-  };
+    const today = new Date().toISOString().split('T')[0];
+    let count = parseInt(localStorage.getItem('messageCount') || '0');
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!subscribed) {
+      if (localStorage.getItem('rateLimitDate') !== today) {
+        count = 0;
+        localStorage.setItem('rateLimitDate', today);
+        localStorage.setItem('messageCount', '0');
+      }
+      setRemainingMessages(10 - count);
+    }
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
-    
-    // Add system prompt + previous messages + new user message
-    const currentMessages = messages.length === 0 
-      ? [systemPrompt, userMessage]
-      : [...messages, userMessage];
+    setMessages([{
+      role: 'assistant',
+      content: isWelsh 
+        ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
+        : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
+    }]);
+  }, [isWelsh]);
 
-    setMessages(currentMessages);
-    setInput('');
-    setIsLoading(true);
-
+  const openCustomerPortal = async () => {
     try {
-      const response = await fetch('/api/chat', {
+      const res = await fetch('/api/create-portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: currentMessages,
-          language 
-        }),
+        body: JSON.stringify({ email: localStorage.getItem('userEmail') }),
       });
-
-      if (!response.ok) throw new Error('API error');
-
-      const data = await response.json();
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: data.choices[0].message.content 
-      }]);
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
     } catch (error) {
-      console.error(error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: language === 'en' 
-          ? "Sorry, something went wrong. Please try again." 
-          : "Mae'n ddrwg gen i, aeth rhywbeth o'i le. Ceisiwch eto." 
-      }]);
-    } finally {
-      setIsLoading(false);
+      alert("Couldn't open Manage Plan");
     }
   };
 
+  const sendMessage = async () => {
+    if (!input.trim() || loading) return;
+
+    if (!isSubscribed) {
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
+      if (count >= 10) {
+        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
+        return;
+      }
+      count++;
+      localStorage.setItem('messageCount', count.toString());
+      setRemainingMessages(10 - count);
+    }
+
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input, isWelsh }),
+      });
+
+      const data = await res.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Better Markdown-like rendering
+  const formatMessage = (text: string) => {
+    let formatted = text
+      .replace(/\n/g, '<br>')                    // Line breaks
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')   // Bold
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Italics
+      .replace(/^- (.+)$/gm, '• $1<br>');        // Simple lists
+
+    return formatted;
+  };
+
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-gray-950 text-white">
-      {/* Header with Language Toggle */}
-      <div className="border-b border-gray-800 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">a.wales AI</h1>
+    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
+      <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
+            <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
+          </div>
+
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            {isSubscribed ? (
+              <button onClick={openCustomerPortal} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
+                Manage Plan
+              </button>
+            ) : (
+              <Link href="/pricing" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
+                Upgrade
+              </Link>
+            )}
+          </div>
         </div>
-        
-        <div className="flex items-center gap-2 bg-gray-900 rounded-full p-1">
-          <button
-            onClick={() => setLanguage('en')}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-              language === 'en' 
-                ? 'bg-blue-600 text-white' 
-                : 'hover:bg-gray-800'
-            }`}
-          >
-            🇬🇧 EN
-          </button>
-          <button
-            onClick={() => setLanguage('cy')}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-              language === 'cy' 
-                ? 'bg-blue-600 text-white' 
-                : 'hover:bg-gray-800'
-            }`}
-          >
-            🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
-          </button>
+      </header>
+
+      {/* Welsh Toggle */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
+        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {messages.length === 0 && (
-          <div className="text-center mt-20">
-            <p className="text-2xl mb-2">👋 Welcome to a.wales</p>
-            <p className="text-gray-400">How can I help you today?</p>
-          </div>
-        )}
-
-        {messages.filter(m => m.role !== 'system').map((msg, i) => (
+      {/* Messages with Markdown Support */}
+      <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
+        {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
-              msg.role === 'user' 
-                ? 'bg-blue-600' 
-                : 'bg-gray-800'
-            }`}>
-              {msg.content}
-            </div>
+            <div 
+              className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}
+              dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
+            />
           </div>
         ))}
-
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-800 rounded-3xl px-6 py-4">Thinking...</div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+        {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t border-gray-800 bg-gray-950">
-        <div className="flex gap-3">
+      {/* Compact Input */}
+      <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
+        <div className="max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={language === 'en' ? "Ask anything..." : "Gofyn unrhyw beth..."}
-            className="flex-1 bg-gray-900 border border-gray-700 rounded-full px-6 py-4 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500"
-            disabled={isLoading}
+            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
+            disabled={!isSubscribed && remainingMessages <= 0}
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 mb-2 min-h-[50px]"
           />
           <button
             onClick={sendMessage}
-            disabled={isLoading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 px-10 rounded-full font-medium transition"
+            disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
