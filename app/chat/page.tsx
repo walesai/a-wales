@@ -12,20 +12,7 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load saved chat history
   useEffect(() => {
-    const savedMessages = localStorage.getItem('chatHistory');
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    } else {
-      setMessages([{
-        role: 'assistant',
-        content: isWelsh 
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
-          : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
-      }]);
-    }
-
     const subscribed = localStorage.getItem('isSubscribed') === 'true';
     setIsSubscribed(subscribed);
 
@@ -40,14 +27,16 @@ export default function Chat() {
       }
       setRemainingMessages(10 - count);
     }
+
+    setMessages([{
+      role: 'assistant',
+      content: isWelsh
+        ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!"
+        : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
+    }]);
   }, [isWelsh]);
 
-  // Save messages to localStorage
-  useEffect(() => {
-    localStorage.setItem('chatHistory', JSON.stringify(messages));
-  }, [messages]);
-
-  // Auto-scroll
+  // Reliable Auto-Scroll
   useEffect(() => {
     setTimeout(() => {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,6 +91,7 @@ export default function Chat() {
     }
   };
 
+  // Markdown rendering
   const formatMessage = (text: string) => {
     let formatted = text
       .replace(/\n/g, '<br>')
@@ -109,18 +99,6 @@ export default function Chat() {
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^- (.+)$/gm, '• $1<br>');
     return formatted;
-  };
-
-  const clearChat = () => {
-    if (confirm(isWelsh ? "Clirio sgwrs?" : "Clear chat history?")) {
-      localStorage.removeItem('chatHistory');
-      setMessages([{
-        role: 'assistant',
-        content: isWelsh 
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Sgwrs wedi clirio. Sut alla i helpu?" 
-          : "Chat history cleared. How can I help you?"
-      }]);
-    }
   };
 
   return (
@@ -164,7 +142,7 @@ export default function Chat() {
         )}
       </header>
 
-      {/* Messages */}
+      {/* Messages with Markdown + Auto-Scroll */}
       <div 
         className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
         ref={chatEndRef}
@@ -183,13 +161,7 @@ export default function Chat() {
 
       {/* Compact Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
-        <div className="max-w-4xl mx-auto flex gap-2">
-          <button
-            onClick={clearChat}
-            className="px-4 py-3 text-xs text-zinc-400 hover:text-white"
-          >
-            Clear Chat
-          </button>
+        <div className="max-w-4xl mx-auto">
           <input
             type="text"
             value={input}
@@ -197,12 +169,12 @@ export default function Chat() {
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
             disabled={!isSubscribed && remainingMessages <= 0}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 min-h-[52px]"
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 text-base focus:outline-none focus:border-blue-500 mb-2 min-h-[50px]"
           />
           <button
             onClick={sendMessage}
             disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
-            className="px-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl font-medium min-h-[52px]"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
