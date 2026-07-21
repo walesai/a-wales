@@ -25,8 +25,8 @@ export default function Chat() {
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales. Use markdown for **bold**, lists, and tables when helpful."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown for **bold**, lists, and tables when helpful."
+      ? "You are a helpful, friendly AI assistant for Wales."
+      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise."
   };
 
   const sendMessage = async () => {
@@ -53,7 +53,7 @@ export default function Chat() {
 
       const data = await response.json();
 
-      if (!response.ok || !data.choices?.[0]?.message?.content) {
+      if (!response.ok) {
         throw new Error(data.error || 'Failed to get response');
       }
       
@@ -70,21 +70,6 @@ export default function Chat() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Safe markdown renderer
-  const renderMessage = (content: string) => {
-    let formatted = content
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 py-0.5 rounded">$1</code>');
-
-    formatted = formatted.replace(/^[-*]\s+(.+)$/gm, '• $1');
-    formatted = formatted.replace(/^\d+\.\s+(.+)$/gm, '$1');
-
-    return formatted.split('\n').map((line, i) => (
-      <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: line }} />
-    ));
   };
 
   return (
@@ -127,16 +112,8 @@ export default function Chat() {
             <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
               msg.role === 'user' 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-gray-800'
-            }`}>
-              {msg.role === 'user' ? (
-                <p className="whitespace-pre-wrap">{msg.content}</p>
-              ) : (
-                <div className="prose prose-invert max-w-none">
-                  {renderMessage(msg.content)}
-                </div>
-              )}
-            </div>
+                : 'bg-gray-800 prose prose-invert max-w-none'
+            }`} dangerouslySetInnerHTML={{ __html: msg.content }} />
           </div>
         ))}
 
@@ -148,22 +125,21 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Improved Mobile Input Area */}
       <div className="p-4 border-t border-gray-800 bg-gray-950">
-        <div className="flex flex-col gap-3">
+        <div className="flex gap-3">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={language === 'en' ? "Ask anything..." : "Gofyn unrhyw beth..."}
-            className="bg-gray-900 border border-gray-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500 w-full"
+            className="flex-1 bg-gray-900 border border-gray-700 rounded-full px-6 py-4 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500"
             disabled={isLoading}
           />
           <button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 py-4 rounded-2xl font-medium transition w-full text-lg"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 px-10 rounded-full font-medium transition"
           >
             Send
           </button>
