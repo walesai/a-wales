@@ -15,9 +15,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -150,20 +148,20 @@ export default function Chat() {
       </div>
 
       <div className="p-4 border-t border-gray-800 bg-gray-950">
-        <div className="flex flex-col gap-3">
+        <div className="flex gap-3">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
             placeholder={language === 'en' ? "Ask anything..." : "Gofyn unrhyw beth..."}
-            className="bg-gray-900 border border-gray-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500 w-full"
+            className="flex-1 bg-gray-900 border border-gray-700 rounded-full px-6 py-4 focus:outline-none focus:border-blue-500 text-white placeholder-gray-500"
             disabled={isLoading}
           />
           <button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 py-4 rounded-2xl font-medium text-lg w-full transition"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 px-10 rounded-full font-medium transition"
           >
             Send
           </button>
