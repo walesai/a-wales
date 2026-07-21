@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function Chat() {
@@ -10,6 +10,7 @@ export default function Chat() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [remainingMessages, setRemainingMessages] = useState(10);
   const [isWelsh, setIsWelsh] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const subscribed = localStorage.getItem('isSubscribed') === 'true';
@@ -29,11 +30,16 @@ export default function Chat() {
 
     setMessages([{
       role: 'assistant',
-      content: isWelsh 
-        ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
+      content: isWelsh
+        ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!"
         : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
     }]);
   }, [isWelsh]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const openCustomerPortal = async () => {
     try {
@@ -74,7 +80,6 @@ export default function Chat() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input, isWelsh }),
       });
-
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (error) {
@@ -88,68 +93,66 @@ export default function Chat() {
   const formatMessage = (text: string) => {
     let formatted = text
       .replace(/\n/g, '<br>')                    // Line breaks
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')   // Bold
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') // Bold
       .replace(/\*(.+?)\*/g, '<em>$1</em>')      // Italics
       .replace(/^- (.+)$/gm, '• $1<br>');        // Simple lists
-
     return formatted;
   };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
-  <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-    <div className="flex items-center gap-3">
-      <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-      <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
-    </div>
+        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
+            <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
+          </div>
 
-    <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-      <Link href="/chat">Chat</Link>
-      <Link href="/pricing">Pricing</Link>
-    </nav>
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
+          </nav>
 
-    {/* Desktop + Mobile Toggle + Manage Plan */}
-    <div className="flex items-center gap-3">
-      <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-        <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-        <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
-      </div>
+          {/* Desktop + Mobile Toggle + Manage Plan */}
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+              <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+              <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+            </div>
 
-      {isSubscribed ? (
-        <button onClick={openCustomerPortal} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium hidden md:block">
-          Manage Plan
-        </button>
-      ) : (
-        <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium hidden md:block">
-          Upgrade
-        </Link>
-      )}
-    </div>
-  </div>
+            {isSubscribed ? (
+              <button onClick={openCustomerPortal} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium hidden md:block">
+                Manage Plan
+              </button>
+            ) : (
+              <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium hidden md:block">
+                Upgrade
+              </Link>
+            )}
+          </div>
+        </div>
 
-  {/* Mobile Manage Plan Button (visible on small screens) */}
-  {isSubscribed && (
-    <div className="md:hidden border-t border-zinc-800 bg-zinc-900 px-4 py-3 flex justify-center">
-      <button onClick={openCustomerPortal} className="w-full max-w-xs py-3 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
-        Manage Plan
-      </button>
-    </div>
-  )}
-</header>
+        {/* Mobile Manage Plan Button */}
+        {isSubscribed && (
+          <div className="md:hidden border-t border-zinc-800 bg-zinc-900 px-4 py-3 flex justify-center">
+            <button onClick={openCustomerPortal} className="w-full max-w-xs py-3 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
+              Manage Plan
+            </button>
+          </div>
+        )}
+      </header>
 
-      
-
-            {/* Messages - with auto-scroll */}
+      {/* Messages with Markdown + Auto-Scroll */}
       <div 
-        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full scroll-smooth"
-        id="chat-messages"
+        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
+        ref={chatEndRef}
       >
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}>
-              {msg.content}
-            </div>
+            <div 
+              className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800 border border-zinc-700'}`}
+              dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
+            />
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
