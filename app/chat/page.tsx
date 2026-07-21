@@ -12,7 +12,7 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load memory
+  // Load chat memory
   useEffect(() => {
     const saved = localStorage.getItem('chatHistory');
     if (saved) {
@@ -20,7 +20,7 @@ export default function Chat() {
     }
   }, []);
 
-  // Save memory
+  // Save chat memory
   useEffect(() => {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
@@ -34,6 +34,17 @@ export default function Chat() {
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
+
+    if (!isSubscribed) {
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
+      if (count >= 10) {
+        setMessages(prev => [...prev, { role: 'assistant', content: "Daily limit reached." }]);
+        return;
+      }
+      count++;
+      localStorage.setItem('messageCount', count.toString());
+      setRemainingMessages(10 - count);
+    }
 
     const userMessage = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -63,6 +74,11 @@ export default function Chat() {
             <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
             <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
           </div>
+
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+            <Link href="/chat">Chat</Link>
+            <Link href="/pricing">Pricing</Link>
+          </nav>
         </div>
       </header>
 
