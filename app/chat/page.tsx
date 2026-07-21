@@ -20,8 +20,8 @@ export default function Chat() {
     } else {
       setMessages([{
         role: 'assistant',
-        content: isWelsh 
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!" 
+        content: isWelsh
+          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!"
           : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
       }]);
     }
@@ -47,7 +47,8 @@ export default function Chat() {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
 
-    useEffect(() => {
+  // Robust Auto-Scroll
+  useEffect(() => {
     setTimeout(() => {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     }, 150);
@@ -115,17 +116,16 @@ export default function Chat() {
       localStorage.removeItem('chatHistory');
       setMessages([{
         role: 'assistant',
-        content: isWelsh 
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Sgwrs wedi clirio. Sut alla i helpu?" 
+        content: isWelsh
+          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Sgwrs wedi clirio. Sut alla i helpu?"
           : "Chat history cleared. How can I help you?"
       }]);
     }
   };
 
-    return (
+  return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
-        {/* Your existing header code remains unchanged */}
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
@@ -164,9 +164,9 @@ export default function Chat() {
         )}
       </header>
 
-      {/* Messages Container */}
+      {/* Messages with Markdown + Auto-Scroll */}
       <div 
-        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full pb-24"
+        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full pb-32"
         ref={chatEndRef}
       >
         {messages.map((msg, i) => (
