@@ -1,3 +1,4 @@
+// Chat memory enabled - July 21 2026
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
