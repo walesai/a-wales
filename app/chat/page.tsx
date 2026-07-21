@@ -41,6 +41,10 @@ export default function Chat() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+    useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
   const openCustomerPortal = async () => {
     try {
       const res = await fetch('/api/create-portal', {
@@ -142,7 +146,7 @@ export default function Chat() {
         )}
       </header>
 
-      {/* Messages with Markdown + Auto-Scroll */}
+            {/* Messages with reliable auto-scroll */}
       <div 
         className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
         ref={chatEndRef}
@@ -156,6 +160,7 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
+        <div ref={chatEndRef} />
       </div>
 
       {/* Compact Input */}
