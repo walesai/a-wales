@@ -1,11 +1,12 @@
 import { NextRequest } from 'next/server';
+import { marked } from 'marked';
 
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
 
     if (!process.env.GROK_API_KEY) {
-      return Response.json({ error: 'GROK_API_KEY not set' }, { status: 500 });
+      return Response.json({ error: 'GROK_API_KEY not configured' }, { status: 500 });
     }
 
     const response = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -25,13 +26,25 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Grok API error:', data);
-      return Response.json({ error: data.error || 'API error' }, { status: response.status });
+      return Response.json({ error: data.error?.message || 'API error' }, { status: response.status });
     }
 
-    return Response.json(data);
+    // Server-side markdown parsing
+    const rawContent = data.choices[0].message.content;
+    const htmlContent = marked.parse(rawContent);
+
+    return Response.json({
+      ...data,
+      choices: [{
+        ...data.choices[0],
+        message: {
+          ...data.choices[0].message,
+          content: htmlContent
+        }
+      }]
+    });
   } catch (error) {
-    console.error('Server error:', error);
+    console.error('Chat API error:', error);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
