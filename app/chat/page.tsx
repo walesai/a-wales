@@ -15,10 +15,11 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
 
-  // Auto-scroll when new messages arrive
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -73,7 +74,6 @@ export default function Chat() {
     }
   };
 
-  // Safe markdown renderer
   const renderMessage = (content: string) => {
     let formatted = content
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -149,7 +149,6 @@ export default function Chat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input with Submit Below - Better Mobile Experience */}
       <div className="p-4 border-t border-gray-800 bg-gray-950">
         <div className="flex flex-col gap-3">
           <input
