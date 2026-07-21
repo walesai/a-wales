@@ -13,31 +13,21 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-    // Load saved chat history
+    // Chat Memory - Simple & Reliable
   useEffect(() => {
     const saved = localStorage.getItem('chatHistory');
-    console.log("Loaded chat history:", saved ? "Yes" : "No");
     if (saved) {
       try {
         setMessages(JSON.parse(saved));
       } catch (e) {
-        console.error("Failed to parse chat history");
+        console.error("Failed to load chat");
       }
-    } else {
-      setMessages([{
-        role: 'assistant',
-        content: isWelsh
-          ? "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Croeso i a.wales Premium!"
-          : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
-      }]);
     }
-  }, [isWelsh]);
+  }, []);
 
-  // Save messages
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem('chatHistory', JSON.stringify(messages));
-      console.log("Saved chat history, length:", messages.length);
     }
   }, [messages]);
 
