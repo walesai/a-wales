@@ -98,30 +98,45 @@ export default function Chat() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
-            <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
-          </div>
+  <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="flex items-center gap-3">
+      <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
+      <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
+    </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-            <Link href="/chat">Chat</Link>
-            <Link href="/pricing">Pricing</Link>
-          </nav>
+    <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+      <Link href="/chat">Chat</Link>
+      <Link href="/pricing">Pricing</Link>
+    </nav>
 
-          <div className="flex items-center gap-3">
-            {isSubscribed ? (
-              <button onClick={openCustomerPortal} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
-                Manage Plan
-              </button>
-            ) : (
-              <Link href="/pricing" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
-                Upgrade
-              </Link>
-            )}
-          </div>
-        </div>
-      </header>
+    {/* Desktop + Mobile Toggle + Manage Plan */}
+    <div className="flex items-center gap-3">
+      <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+        <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+        <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+      </div>
+
+      {isSubscribed ? (
+        <button onClick={openCustomerPortal} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium hidden md:block">
+          Manage Plan
+        </button>
+      ) : (
+        <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium hidden md:block">
+          Upgrade
+        </Link>
+      )}
+    </div>
+  </div>
+
+  {/* Mobile Manage Plan Button (visible on small screens) */}
+  {isSubscribed && (
+    <div className="md:hidden border-t border-zinc-800 bg-zinc-900 px-4 py-3 flex justify-center">
+      <button onClick={openCustomerPortal} className="w-full max-w-xs py-3 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
+        Manage Plan
+      </button>
+    </div>
+  )}
+</header>
 
       {/* Welsh Toggle */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
