@@ -13,14 +13,15 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load saved chat history
+    // Load saved chat history
   useEffect(() => {
-    const savedMessages = localStorage.getItem('chatHistory');
-    if (savedMessages) {
+    const saved = localStorage.getItem('chatHistory');
+    console.log("Loaded chat history:", saved ? "Yes" : "No");
+    if (saved) {
       try {
-        setMessages(JSON.parse(savedMessages));
+        setMessages(JSON.parse(saved));
       } catch (e) {
-        console.error("Failed to load chat history");
+        console.error("Failed to parse chat history");
       }
     } else {
       setMessages([{
@@ -30,26 +31,14 @@ export default function Chat() {
           : "🏴󠁧󠁢󠁷󠁬󠁳󠁿 Welcome back to a.wales Premium!\n\nHow can I help you today?"
       }]);
     }
-
-    const subscribed = localStorage.getItem('isSubscribed') === 'true';
-    setIsSubscribed(subscribed);
-
-    const today = new Date().toISOString().split('T')[0];
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-
-    if (!subscribed) {
-      if (localStorage.getItem('rateLimitDate') !== today) {
-        count = 0;
-        localStorage.setItem('rateLimitDate', today);
-        localStorage.setItem('messageCount', '0');
-      }
-      setRemainingMessages(10 - count);
-    }
   }, [isWelsh]);
 
-  // Save messages to localStorage
+  // Save messages
   useEffect(() => {
-    localStorage.setItem('chatHistory', JSON.stringify(messages));
+    if (messages.length > 0) {
+      localStorage.setItem('chatHistory', JSON.stringify(messages));
+      console.log("Saved chat history, length:", messages.length);
+    }
   }, [messages]);
 
   // Robust Auto-Scroll
