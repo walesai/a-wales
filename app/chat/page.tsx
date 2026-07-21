@@ -47,11 +47,10 @@ export default function Chat() {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
 
-  // Auto-scroll
-  useEffect(() => {
+    useEffect(() => {
     setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 150);
   }, [messages, loading]);
 
   const openCustomerPortal = async () => {
@@ -164,7 +163,7 @@ export default function Chat() {
         )}
       </header>
 
-      {/* Messages */}
+            {/* Messages with robust auto-scroll */}
       <div 
         className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
         ref={chatEndRef}
@@ -178,7 +177,7 @@ export default function Chat() {
           </div>
         ))}
         {loading && <div className="text-blue-400 pl-4">Thinking...</div>}
-        <div ref={chatEndRef} className="h-px" />
+        <div ref={chatEndRef} className="h-1" />
       </div>
 
              {/* Compact Input - Send button below for mobile */}
