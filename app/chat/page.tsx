@@ -109,42 +109,41 @@ export default function Chat() {
       <Link href="/pricing">Pricing</Link>
     </nav>
 
-    {/* Desktop + Mobile Toggle + Manage Plan */}
     <div className="flex items-center gap-3">
+      {/* Single Toggle */}
       <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-        <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-        <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+        <button 
+          onClick={() => setIsWelsh(false)} 
+          className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}
+        >
+          🇬🇧 EN
+        </button>
+        <button 
+          onClick={() => setIsWelsh(true)} 
+          className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}
+        >
+          🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
+        </button>
       </div>
 
+      {/* Manage Plan Button */}
       {isSubscribed ? (
-        <button onClick={openCustomerPortal} className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium hidden md:block">
+        <button 
+          onClick={openCustomerPortal} 
+          className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium"
+        >
           Manage Plan
         </button>
       ) : (
-        <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium hidden md:block">
+        <Link href="/pricing" className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-2xl text-sm font-medium">
           Upgrade
         </Link>
       )}
     </div>
   </div>
-
-  {/* Mobile Manage Plan Button (visible on small screens) */}
-  {isSubscribed && (
-    <div className="md:hidden border-t border-zinc-800 bg-zinc-900 px-4 py-3 flex justify-center">
-      <button onClick={openCustomerPortal} className="w-full max-w-xs py-3 bg-emerald-600 hover:bg-emerald-700 rounded-2xl text-sm font-medium">
-        Manage Plan
-      </button>
-    </div>
-  )}
 </header>
 
-      {/* Welsh Toggle */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
-        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
-        </div>
-      </div>
+      
 
       {/* Messages with Markdown Support */}
       <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full">
