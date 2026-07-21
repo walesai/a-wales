@@ -25,8 +25,8 @@ export default function Chat() {
   const systemPrompt = {
     role: 'system' as const,
     content: language === 'en' 
-      ? "You are a helpful, friendly AI assistant for Wales."
-      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise."
+      ? "You are a helpful, friendly AI assistant for Wales. Use markdown for **bold**, lists, and tables when helpful."
+      : "You are a helpful, friendly AI assistant for Wales. Respond in Welsh (Cymraeg) unless asked otherwise. Use markdown for **bold**, lists, and tables when helpful."
   };
 
   const sendMessage = async () => {
@@ -53,7 +53,7 @@ export default function Chat() {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.choices?.[0]?.message?.content) {
         throw new Error(data.error || 'Failed to get response');
       }
       
@@ -70,6 +70,22 @@ export default function Chat() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Safe markdown renderer
+  const renderMessage = (content: string) => {
+    let formatted = content
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 py-0.5 rounded">$1</code>');
+
+    // Simple list handling
+    formatted = formatted.replace(/^[-*]\s+(.+)$/gm, '• $1');
+    formatted = formatted.replace(/^\d+\.\s+(.+)$/gm, '$1');
+
+    return formatted.split('\n').map((line, i) => (
+      <p key={i} className="mb-2 last:mb-0 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: line }} />
+    ));
   };
 
   return (
@@ -112,8 +128,16 @@ export default function Chat() {
             <div className={`max-w-[85%] rounded-3xl px-6 py-4 ${
               msg.role === 'user' 
                 ? 'bg-blue-600 text-white' 
-                : 'bg-gray-800 prose prose-invert max-w-none'
-            }`} dangerouslySetInnerHTML={{ __html: msg.content }} />
+                : 'bg-gray-800'
+            }`}>
+              {msg.role === 'user' ? (
+                <p className="whitespace-pre-wrap">{msg.content}</p>
+              ) : (
+                <div className="prose prose-invert max-w-none">
+                  {renderMessage(msg.content)}
+                </div>
+              )}
+            </div>
           </div>
         ))}
 
