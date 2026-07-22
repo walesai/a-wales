@@ -108,6 +108,11 @@ export default function Chat() {
             disabled={!isSubscribed && remainingMessages <= 0}
             className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 mb-2"
           />
+                      <button
+            onClick={sendMessage}
+            disabled={loading || !input.trim()}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
+          >
             Send
           </button>
         </div>
