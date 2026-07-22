@@ -12,15 +12,20 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load previous questions
+  // Premium Subscription Check
   useEffect(() => {
-    const saved = localStorage.getItem('chatHistory');
-    if (saved) {
-      setMessages(JSON.parse(saved));
-    }
+    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    setIsSubscribed(subscribed);
+    console.log("Premium status:", subscribed); // Debug
   }, []);
 
-  // Save previous questions
+  // Load chat memory
+  useEffect(() => {
+    const saved = localStorage.getItem('chatHistory');
+    if (saved) setMessages(JSON.parse(saved));
+  }, []);
+
+  // Save chat memory
   useEffect(() => {
     localStorage.setItem('chatHistory', JSON.stringify(messages));
   }, [messages]);
@@ -100,13 +105,14 @@ export default function Chat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything..."
+            placeholder={isSubscribed ? "Ask me anything..." : `${remainingMessages} left`}
+            disabled={!isSubscribed && remainingMessages <= 0}
             className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 mb-2"
           />
           <button
             onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 rounded-3xl py-3.5 font-medium"
+            disabled={loading || (!isSubscribed && remainingMessages <= 0) || !input.trim()}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
