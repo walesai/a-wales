@@ -35,7 +35,7 @@ export default function Chat() {
     if (!isSubscribed) {
       let count = parseInt(localStorage.getItem('messageCount') || '0');
       if (count >= 10) {
-        setMessages(prev => [...prev, { role: 'assistant', content: "Daily limit reached." }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
         return;
       }
       count++;
@@ -57,7 +57,7 @@ export default function Chat() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble right now." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
     } finally {
       setLoading(false);
     }
@@ -76,6 +76,13 @@ export default function Chat() {
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
+
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+              <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
+              <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
+            </div>
+          </div>
         </div>
       </header>
 
