@@ -12,22 +12,25 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Load previous questions from memory
   useEffect(() => {
-    const subscribed = localStorage.getItem('isSubscribed') === 'true';
-    setIsSubscribed(subscribed);
-
-    const today = new Date().toISOString().split('T')[0];
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-
-    if (!subscribed) {
-      if (localStorage.getItem('rateLimitDate') !== today) {
-        count = 0;
-        localStorage.setItem('rateLimitDate', today);
-        localStorage.setItem('messageCount', '0');
-      }
-      setRemainingMessages(10 - count);
+    const saved = localStorage.getItem('chatHistory');
+    if (saved) {
+      setMessages(JSON.parse(saved));
     }
   }, []);
+
+  // Save previous questions
+  useEffect(() => {
+    localStorage.setItem('chatHistory', JSON.stringify(messages));
+  }, [messages]);
+
+  // Auto-scroll
+  useEffect(() => {
+    setTimeout(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -35,7 +38,7 @@ export default function Chat() {
     if (!isSubscribed) {
       let count = parseInt(localStorage.getItem('messageCount') || '0');
       if (count >= 10) {
-        setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Rydych wedi cyrraedd eich terfyn dyddiol." : "Daily limit reached." }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: "Daily limit reached." }]);
         return;
       }
       count++;
@@ -57,7 +60,7 @@ export default function Chat() {
       const data = await res.json();
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble right now." }]);
     } finally {
       setLoading(false);
     }
@@ -76,13 +79,6 @@ export default function Chat() {
             <Link href="/chat">Chat</Link>
             <Link href="/pricing">Pricing</Link>
           </nav>
-
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-              <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-              <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
-            </div>
-          </div>
         </div>
       </header>
 
@@ -99,19 +95,18 @@ export default function Chat() {
 
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
         <div className="max-w-4xl mx-auto">
-                    <input
+          <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
-            disabled={!isSubscribed && remainingMessages <= 0}
+            placeholder="Ask me anything..."
             className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 mb-2"
           />
-                      <button
+          <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
+            className="w-full bg-blue-600 hover:bg-blue-700 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
