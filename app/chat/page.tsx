@@ -12,23 +12,20 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Load previous questions
   useEffect(() => {
-    const subscribed = localStorage.getItem('isSubscribed') === 'true';
-    setIsSubscribed(subscribed);
-
-    const today = new Date().toISOString().split('T')[0];
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-
-    if (!subscribed) {
-      if (localStorage.getItem('rateLimitDate') !== today) {
-        count = 0;
-        localStorage.setItem('rateLimitDate', today);
-        localStorage.setItem('messageCount', '0');
-      }
-      setRemainingMessages(10 - count);
+    const saved = localStorage.getItem('chatHistory');
+    if (saved) {
+      setMessages(JSON.parse(saved));
     }
   }, []);
 
+  // Save previous questions
+  useEffect(() => {
+    localStorage.setItem('chatHistory', JSON.stringify(messages));
+  }, [messages]);
+
+  // Auto-scroll
   useEffect(() => {
     setTimeout(() => {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -109,7 +106,7 @@ export default function Chat() {
           <button
             onClick={sendMessage}
             disabled={loading || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-3xl py-3.5 font-medium"
+            className="w-full bg-blue-600 hover:bg-blue-700 rounded-3xl py-3.5 font-medium"
           >
             Send
           </button>
