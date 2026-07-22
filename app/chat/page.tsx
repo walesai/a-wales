@@ -99,19 +99,15 @@ export default function Chat() {
 
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
         <div className="max-w-4xl mx-auto">
-          <input
+                    <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask me anything..."
+            placeholder={isSubscribed ? (isWelsh ? "Gofyn unrhyw beth..." : "Ask me anything...") : `${remainingMessages} left`}
+            disabled={!isSubscribed && remainingMessages <= 0}
             className="w-full bg-zinc-800 border border-zinc-700 rounded-3xl px-5 py-3.5 mb-2"
           />
-          <button
-            onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            className="w-full bg-blue-600 hover:bg-blue-700 rounded-3xl py-3.5 font-medium"
-          >
             Send
           </button>
         </div>
