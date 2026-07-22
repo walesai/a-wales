@@ -12,6 +12,14 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  seEffect(() => {
+    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    setIsSubscribed(subscribed);
+
+    // Debug log
+    console.log("Premium status:", subscribed);
+  }, []);
+
   // Load previous questions from memory
   useEffect(() => {
     const saved = localStorage.getItem('chatHistory');
