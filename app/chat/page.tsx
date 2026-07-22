@@ -12,25 +12,22 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Load chat memory
   useEffect(() => {
-    const saved = localStorage.getItem('chatHistory');
-    if (saved) {
-      setMessages(JSON.parse(saved));
+    const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    setIsSubscribed(subscribed);
+
+    const today = new Date().toISOString().split('T')[0];
+    let count = parseInt(localStorage.getItem('messageCount') || '0');
+
+    if (!subscribed) {
+      if (localStorage.getItem('rateLimitDate') !== today) {
+        count = 0;
+        localStorage.setItem('rateLimitDate', today);
+        localStorage.setItem('messageCount', '0');
+      }
+      setRemainingMessages(10 - count);
     }
   }, []);
-
-  // Save chat memory
-  useEffect(() => {
-    localStorage.setItem('chatHistory', JSON.stringify(messages));
-  }, [messages]);
-
-  // Auto-scroll
-  useEffect(() => {
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
