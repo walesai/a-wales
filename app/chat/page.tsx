@@ -47,11 +47,11 @@ export default function Chat() {
   }, [messages]);
 
   // Auto-scroll
-  useEffect(() => {
-    setTimeout(() => {
-      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  }, [messages, loading]);
+useEffect(() => {
+  setTimeout(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}, [messages, loading]);
 
   const sendMessage = async () => {
   if (!input.trim() || loading) return;
@@ -142,20 +142,19 @@ export default function Chat() {
       </header>
 
       {/* Messages */}
-      <div
-        className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full"
-        ref={chatEndRef}
-      >
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
-              {msg.content}
-            </div>
-          </div>
-        ))}
-        {loading && <div className="text-blue-400">Thinking...</div>}
-        <div ref={chatEndRef} />
+<div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full pb-4">
+  {messages.map((msg, i) => (
+    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+      <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
+        {msg.content}
       </div>
+    </div>
+  ))}
+  {loading && <div className="text-blue-400">Thinking...</div>}
+  
+  {/* This is the scroll target - keep only this ref */}
+  <div ref={chatEndRef} />
+</div>
 
       {/* Input */}
       <div className="p-3 border-t border-zinc-800 bg-zinc-900 sticky bottom-0">
