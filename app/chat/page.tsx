@@ -106,6 +106,16 @@ useEffect(() => {
     }
   };
 
+const formatMessage = (text: string) => {
+  if (!text) return '';
+  return text
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)$/gm, '• $1<br>')
+    .replace(/`(.+?)`/g, '<code class="bg-zinc-700 px-1 rounded">$1</code>');
+};
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
       {/* Header */}
@@ -145,14 +155,13 @@ useEffect(() => {
 <div className="flex-1 p-6 overflow-y-auto space-y-6 max-w-4xl mx-auto w-full pb-4">
   {messages.map((msg, i) => (
     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}>
-        {msg.content}
-      </div>
+      <div
+        className={`max-w-[85%] p-5 rounded-3xl ${msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'}`}
+        dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }}
+      />
     </div>
   ))}
   {loading && <div className="text-blue-400">Thinking...</div>}
-  
-  {/* This is the scroll target - keep only this ref */}
   <div ref={chatEndRef} />
 </div>
 
