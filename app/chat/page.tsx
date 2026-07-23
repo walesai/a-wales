@@ -54,45 +54,50 @@ export default function Chat() {
   }, [messages, loading]);
 
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  if (!input.trim() || loading) return;
 
-    // Free tier limit
-    if (!isSubscribed) {
-      let count = parseInt(localStorage.getItem('messageCount') || '0');
-      if (count >= 10) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: isWelsh ? 'Rydych wedi cyrraedd eich terfyn dyddiol.' : 'Daily limit reached.'
-        }]);
-        return;
-      }
-      count++;
-      localStorage.setItem('messageCount', count.toString());
-      setRemainingMessages(10 - count);
-    }
-
-    const userMessage = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setLoading(true);
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input, isWelsh }),
-      });
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-    } catch (error) {
+  // Free tier limit
+  if (!isSubscribed) {
+    let count = parseInt(localStorage.getItem('messageCount') || '0');
+    if (count >= 10) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now."
+        content: isWelsh ? 'Rydych wedi cyrraedd eich terfyn dyddiol.' : 'Daily limit reached.'
       }]);
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+    count++;
+    localStorage.setItem('messageCount', count.toString());
+    setRemainingMessages(10 - count);
+  }
+
+  const userMessage = { role: 'user', content: input };
+  const updatedMessages = [...messages, userMessage];
+  setMessages(updatedMessages);
+  setInput('');
+  setLoading(true);
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: updatedMessages,   // ← send full conversation
+        isWelsh
+      }),
+    });
+
+    const data = await res.json();
+    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+  } catch (error) {
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now."
+    }]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const clearChat = () => {
     if (confirm(isWelsh ? 'Clirio sgwrs?' : 'Clear chat history?')) {
