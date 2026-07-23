@@ -16,7 +16,7 @@ export default function Pricing() {
     const newLang = !isWelsh;
     setIsWelsh(newLang);
     localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
-    window.location.reload(); // Ensures everything updates
+    window.location.reload();
   };
 
   const handleCheckout = async (plan: 'monthly' | 'annual') => {
@@ -27,7 +27,6 @@ export default function Pricing() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan }),
       });
-
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
@@ -43,7 +42,6 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-950 text-white">
-      
       {/* Header */}
       <header className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
@@ -60,12 +58,22 @@ export default function Pricing() {
             <Link href="/pricing">Pricing</Link>
           </nav>
 
-          <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 flex justify-end">
-        <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
-          <button onClick={() => setIsWelsh(false)} className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}>🇬🇧 EN</button>
-          <button onClick={() => setIsWelsh(true)} className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}>🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY</button>
-        </div>
-      </div>
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
+              <button
+                onClick={() => setIsWelsh(false)}
+                className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}
+              >
+                🇬🇧 EN
+              </button>
+              <button
+                onClick={() => setIsWelsh(true)}
+                className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}
+              >
+                🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -88,7 +96,10 @@ export default function Pricing() {
               <li>✅ {isWelsh ? "10 negeseuon y dydd" : "10 messages per day"}</li>
               <li>✅ {isWelsh ? "Grok AI sylfaenol" : "Basic Grok AI"}</li>
             </ul>
-            <Link href="/chat" className="mt-auto w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium transition">
+            <Link
+              href="/chat"
+              className="mt-auto w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium transition"
+            >
               {isWelsh ? "Dechrau Am Ddim" : "Start Free"}
             </Link>
           </div>
