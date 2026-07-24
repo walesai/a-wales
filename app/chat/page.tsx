@@ -10,13 +10,15 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium' | 'pro'>('free');
   const [remainingMessages, setRemainingMessages] = useState(10);
+  const [remainingVideos, setRemainingVideos] = useState(0);
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const trim = (msgs: any[]) => msgs.slice(-MAX_HISTORY);
 
-  // Detect if the user is asking for an image
+  // Detect image request
   const isImageRequest = (text: string) => {
     const lower = text.toLowerCase();
     return (
@@ -33,9 +35,26 @@ export default function Chat() {
     );
   };
 
+  // Detect video request
+  const isVideoRequest = (text: string) => {
+    const lower = text.toLowerCase();
+    return (
+      lower.includes('generate video') ||
+      lower.includes('generate a video') ||
+      lower.includes('create a video') ||
+      lower.includes('make a video') ||
+      lower.includes('make video') ||
+      lower.startsWith('video of') ||
+      lower.includes('animate')
+    );
+  };
+
   useEffect(() => {
     const subscribed = localStorage.getItem('isSubscribed') === 'true';
+    const tier = (localStorage.getItem('subscriptionTier') as 'premium' | 'pro') || (subscribed ? 'premium' : 'free');
+    
     setIsSubscribed(subscribed);
+    setSubscriptionTier(tier);
 
     const saved = localStorage.getItem('chatHistory');
     if (saved) {
@@ -46,6 +65,7 @@ export default function Chat() {
       }
     }
 
+    // Free tier message limit
     if (!subscribed) {
       const today = new Date().toISOString().split('T')[0];
       let count = parseInt(localStorage.getItem('messageCount') || '0');
@@ -55,6 +75,20 @@ export default function Chat() {
         localStorage.setItem('messageCount', '0');
       }
       setRemainingMessages(10 - count);
+    }
+
+    // Video daily limit
+    if (subscribed) {
+      const today = new Date().toISOString().split('T')[0];
+      let videoCount = parseInt(localStorage.getItem('videoCount') || '0');
+      if (localStorage.getItem('videoLimitDate') !== today) {
+        videoCount = 0;
+        localStorage.setItem('videoLimitDate', today);
+        localStorage.setItem('videoCount', '0');
+      }
+
+      const maxVideos = tier === 'pro' ? 15 : 3;
+      setRemainingVideos(maxVideos - videoCount);
     }
   }, []);
 
@@ -73,7 +107,7 @@ export default function Chat() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
-    // Free tier limit
+    // Free tier message limit
     if (!isSubscribed) {
       let count = parseInt(localStorage.getItem('messageCount') || '0');
       if (count >= 10) {
@@ -102,8 +136,9 @@ export default function Chat() {
     setLoading(true);
 
     const wantsImage = isImageRequest(input);
+    const wantsVideo = isVideoRequest(input);
 
-    // Image generation is Premium only
+    // Image generation - Premium / Pro only
     if (wantsImage && !isSubscribed) {
       setMessages(prev =>
         trim([
@@ -120,6 +155,46 @@ export default function Chat() {
       return;
     }
 
+    // Video generation - Premium / Pro only + daily limit
+    if (wantsVideo) {
+      if (!isSubscribed) {
+        setMessages(prev =>
+          trim([
+            ...prev,
+            {
+              role: 'assistant',
+              content: isWelsh
+                ? 'Mae creu fideos ar gael i danysgrifwyr Premium yn unig.'
+                : 'Video generation is only available for Premium subscribers.',
+            },
+          ])
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (remainingVideos <= 0) {
+        setMessages(prev =>
+          trim([
+            ...prev,
+            {
+              role: 'assistant',
+              content: isWelsh
+                ? `Rydych wedi cyrraedd eich terfyn fideo dyddiol (${subscriptionTier === 'pro' ? 15 : 3}).`
+                : `You've reached your daily video limit (${subscriptionTier === 'pro' ? 15 : 3}).`,
+            },
+          ])
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Increment video count
+      const newCount = parseInt(localStorage.getItem('videoCount') || '0') + 1;
+      localStorage.setItem('videoCount', newCount.toString());
+      setRemainingVideos(prev => prev - 1);
+    }
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -127,14 +202,14 @@ export default function Chat() {
         body: JSON.stringify({
           messages: updatedMessages,
           isWelsh,
-          generateImage: wantsImage, // tell the backend we want an image
+          generateImage: wantsImage,
+          generateVideo: wantsVideo,
         }),
       });
 
       const data = await res.json();
 
       if (data.imageUrl) {
-        // Image response
         setMessages(prev =>
           trim([
             ...prev,
@@ -145,8 +220,18 @@ export default function Chat() {
             },
           ])
         );
+      } else if (data.videoUrl) {
+        setMessages(prev =>
+          trim([
+            ...prev,
+            {
+              role: 'assistant',
+              content: data.reply || (isWelsh ? 'Dyma dy fideo:' : 'Here’s your video:'),
+              videoUrl: data.videoUrl,
+            },
+          ])
+        );
       } else {
-        // Normal text response
         setMessages(prev =>
           trim([...prev, { role: 'assistant', content: data.reply }])
         );
@@ -242,7 +327,6 @@ export default function Chat() {
                 msg.role === 'user' ? 'bg-blue-600' : 'bg-zinc-800'
               }`}
             >
-              {/* Text content */}
               {msg.content && (
                 <div
                   dangerouslySetInnerHTML={{
@@ -251,28 +335,39 @@ export default function Chat() {
                 />
               )}
 
-              {/* Generated image */}
-{msg.imageUrl && (
-  <div className="mt-3">
-    <img
-      src={msg.imageUrl}
-      alt="Generated image"
-      className="rounded-2xl w-full max-w-full h-auto object-contain border border-zinc-700"
-      loading="lazy"
-      onError={(e) => {
-        // Hide broken image on mobile if URL expired
-        (e.target as HTMLImageElement).style.display = 'none';
-      }}
-    />
-  </div>
-)}
+              {/* Image */}
+              {msg.imageUrl && (
+                <div className="mt-3">
+                  <img
+                    src={msg.imageUrl}
+                    alt="Generated image"
+                    className="rounded-2xl w-full max-w-full h-auto object-contain border border-zinc-700"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              {/* Video */}
+              {msg.videoUrl && (
+                <div className="mt-3">
+                  <video
+                    src={msg.videoUrl}
+                    controls
+                    className="rounded-2xl w-full max-w-full border border-zinc-700"
+                  />
+                </div>
+              )}
             </div>
           </div>
         ))}
 
         {loading && (
           <div className="text-blue-400">
-            {isImageRequest(input) || messages[messages.length - 1]?.content?.toLowerCase().includes('image')
+            {isVideoRequest(input)
+              ? isWelsh
+                ? 'Yn creu fideo...'
+                : 'Generating video...'
+              : isImageRequest(input)
               ? isWelsh
                 ? 'Yn creu delwedd...'
                 : 'Generating image...'
@@ -294,8 +389,14 @@ export default function Chat() {
             >
               Clear Chat
             </button>
+
             {isSubscribed && (
-              <span className="text-xs text-emerald-400">Premium</span>
+              <div className="text-xs text-emerald-400 flex gap-3">
+                <span>{subscriptionTier === 'pro' ? 'Pro' : 'Premium'}</span>
+                <span>
+                  {remainingVideos} video{remainingVideos !== 1 ? 's' : ''} left today
+                </span>
+              </div>
             )}
           </div>
 
@@ -307,8 +408,8 @@ export default function Chat() {
             placeholder={
               isSubscribed
                 ? isWelsh
-                  ? 'Gofyn unrhyw beth neu "generate image of..."'
-                  : 'Ask anything or "generate image of..."'
+                  ? 'Gofyn unrhyw beth, "generate image..." neu "generate video..."'
+                  : 'Ask anything, "generate image..." or "generate video..."'
                 : `${remainingMessages} left`
             }
             disabled={!isSubscribed && remainingMessages <= 0}
