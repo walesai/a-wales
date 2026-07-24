@@ -12,14 +12,7 @@ export default function Pricing() {
     setIsWelsh(saved);
   }, []);
 
-  const toggleLanguage = () => {
-    const newLang = !isWelsh;
-    setIsWelsh(newLang);
-    localStorage.setItem('preferredLang', newLang ? 'cy' : 'en');
-    window.location.reload();
-  };
-
-  const handleCheckout = async (plan: 'monthly' | 'annual') => {
+  const handleCheckout = async (plan: 'monthly' | 'annual' | 'pro' | 'annual-pro') => {
     setLoading(plan);
     try {
       const res = await fetch('/api/create-checkout-session', {
@@ -48,7 +41,9 @@ export default function Pricing() {
           <div className="flex items-center gap-4">
             <span className="text-4xl">🏴󠁧󠁢󠁷󠁬󠁳󠁿</span>
             <div>
-              <Link href="/" className="text-2xl font-semibold tracking-tight">a.wales</Link>
+              <Link href="/" className="text-2xl font-semibold tracking-tight">
+                a.wales
+              </Link>
               <p className="text-xs text-zinc-500 -mt-1">Welsh AI</p>
             </div>
           </div>
@@ -62,13 +57,17 @@ export default function Pricing() {
             <div className="flex gap-1 bg-zinc-800 rounded-full p-1">
               <button
                 onClick={() => setIsWelsh(false)}
-                className={`px-4 py-1.5 rounded-full text-xs transition ${!isWelsh ? 'bg-blue-600' : ''}`}
+                className={`px-4 py-1.5 rounded-full text-xs transition ${
+                  !isWelsh ? 'bg-blue-600' : ''
+                }`}
               >
                 🇬🇧 EN
               </button>
               <button
                 onClick={() => setIsWelsh(true)}
-                className={`px-4 py-1.5 rounded-full text-xs transition ${isWelsh ? 'bg-red-600' : ''}`}
+                className={`px-4 py-1.5 rounded-full text-xs transition ${
+                  isWelsh ? 'bg-red-600' : ''
+                }`}
               >
                 🏴󠁧󠁢󠁷󠁬󠁳󠁿 CY
               </button>
@@ -78,71 +77,107 @@ export default function Pricing() {
       </header>
 
       <div className="pt-20 pb-16 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-6xl font-bold mb-6">
-            {isWelsh ? "Dewiswch Eich Cynllun" : "Choose Your Plan"}
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            {isWelsh ? 'Dewiswch Eich Cynllun' : 'Choose Your Plan'}
           </h1>
-          <p className="text-2xl text-zinc-400">
-            {isWelsh ? "AI pwerus ar gyfer Cymru" : "Powerful AI for Wales"}
+          <p className="text-xl md:text-2xl text-zinc-400">
+            {isWelsh ? 'AI pwerus ar gyfer Cymru' : 'Powerful AI for Wales'}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mt-16 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 mt-16 max-w-6xl mx-auto">
           {/* Free */}
           <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-10 flex flex-col">
-            <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Am Ddim" : "Free"}</h3>
+            <h3 className="text-3xl font-semibold mb-2">
+              {isWelsh ? 'Am Ddim' : 'Free'}
+            </h3>
             <p className="text-6xl font-bold mb-8">£0</p>
             <ul className="space-y-4 mb-12 flex-1 text-zinc-300">
-              <li>✅ {isWelsh ? "10 negeseuon y dydd" : "10 messages per day"}</li>
-              <li>✅ {isWelsh ? "Grok AI sylfaenol" : "Basic Grok AI"}</li>
+              <li>✅ {isWelsh ? '10 negeseuon y dydd' : '10 messages per day'}</li>
+              <li>✅ {isWelsh ? 'Grok AI sylfaenol' : 'Basic Grok AI'}</li>
+              <li>❌ {isWelsh ? 'Creu delweddau' : 'Image generation'}</li>
+              <li>❌ {isWelsh ? 'Creu fideos' : 'Video generation'}</li>
             </ul>
             <Link
               href="/chat"
               className="mt-auto w-full py-4 bg-zinc-800 hover:bg-zinc-700 text-center rounded-2xl font-medium transition"
             >
-              {isWelsh ? "Dechrau Am Ddim" : "Start Free"}
+              {isWelsh ? 'Dechrau Am Ddim' : 'Start Free'}
             </Link>
           </div>
 
-          {/* Monthly */}
+          {/* Premium */}
           <div className="bg-white text-zinc-900 rounded-3xl p-10 flex flex-col relative scale-105 shadow-2xl border-2 border-blue-500">
             <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-6 py-2 rounded-full">
-              {isWelsh ? "Mwyaf Poblogaidd" : "MOST POPULAR"}
+              {isWelsh ? 'Mwyaf Poblogaidd' : 'MOST POPULAR'}
             </div>
-            <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Misol" : "Monthly"}</h3>
+            <h3 className="text-3xl font-semibold mb-2">
+              {isWelsh ? 'Premium' : 'Premium'}
+            </h3>
             <p className="text-6xl font-bold mb-2">£4.99</p>
-            <p className="text-zinc-500 mb-8">{isWelsh ? "y mis" : "per month"}</p>
+            <p className="text-zinc-500 mb-8">
+              {isWelsh ? 'y mis' : 'per month'}
+            </p>
             <ul className="space-y-4 mb-12 flex-1">
-              <li>✅ {isWelsh ? "Negeseuon di-ben-draw" : "Unlimited messages"}</li>
-              <li>✅ {isWelsh ? "Creu delweddau" : "Image generation"}</li>
-              <li>✅ {isWelsh ? "Ymatebion cyflymach" : "Priority responses"}</li>
+              <li>✅ {isWelsh ? 'Negeseuon di-ben-draw' : 'Unlimited messages'}</li>
+              <li>✅ {isWelsh ? 'Creu delweddau' : 'Image generation'}</li>
+              <li>
+                ✅ {isWelsh ? 'Creu fideos (3 y dydd)' : 'Video generation (3 per day)'}
+              </li>
+              <li>✅ {isWelsh ? 'Ymatebion cyflymach' : 'Priority responses'}</li>
             </ul>
             <button
               onClick={() => handleCheckout('monthly')}
               disabled={loading === 'monthly'}
               className="mt-auto w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white font-semibold rounded-2xl text-lg transition"
             >
-              {loading === 'monthly' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Misol' : 'Subscribe Monthly')}
+              {loading === 'monthly'
+                ? 'Processing...'
+                : isWelsh
+                ? 'Tanysgrifio Premium'
+                : 'Subscribe Premium'}
             </button>
           </div>
 
-          {/* Annual */}
+          {/* Pro */}
           <div className="bg-zinc-900/50 border border-zinc-700 rounded-3xl p-10 flex flex-col">
-            <h3 className="text-3xl font-semibold mb-2">{isWelsh ? "Blynyddol" : "Annual"}</h3>
-            <p className="text-6xl font-bold mb-2">£49</p>
-            <p className="text-emerald-400 font-medium mb-8">{isWelsh ? "Arbed ~18%" : "Save ~18%"}</p>
+            <h3 className="text-3xl font-semibold mb-2">
+              {isWelsh ? 'Pro' : 'Pro'}
+            </h3>
+            <p className="text-6xl font-bold mb-2">£9.99</p>
+            <p className="text-zinc-500 mb-8">
+              {isWelsh ? 'y mis' : 'per month'}
+            </p>
             <ul className="space-y-4 mb-12 flex-1 text-zinc-300">
-              <li>✅ {isWelsh ? "Popeth yn y Misol" : "Everything in Monthly"}</li>
-              <li>✅ {isWelsh ? "Y gwerth gorau" : "Best value"}</li>
+              <li>✅ {isWelsh ? 'Popeth yn Premium' : 'Everything in Premium'}</li>
+              <li>
+                ✅ {isWelsh ? 'Creu fideos (15 y dydd)' : 'Video generation (15 per day)'}
+              </li>
+              <li>✅ {isWelsh ? 'Blaenoriaeth uwch' : 'Higher priority'}</li>
+              <li>
+                ✅ {isWelsh ? 'Mynediad cynnar i nodweddion newydd' : 'Early access to new features'}
+              </li>
             </ul>
             <button
-              onClick={() => handleCheckout('annual')}
-              disabled={loading === 'annual'}
+              onClick={() => handleCheckout('pro')}
+              disabled={loading === 'pro'}
               className="mt-auto w-full py-4 bg-white hover:bg-zinc-100 text-zinc-900 font-semibold rounded-2xl text-lg transition"
             >
-              {loading === 'annual' ? 'Processing...' : (isWelsh ? 'Tanysgrifio Blynyddol' : 'Subscribe Annually')}
+              {loading === 'pro'
+                ? 'Processing...'
+                : isWelsh
+                ? 'Tanysgrifio Pro'
+                : 'Subscribe Pro'}
             </button>
           </div>
+        </div>
+
+        {/* Annual note */}
+        <div className="text-center mt-12 text-zinc-400 text-sm">
+          {isWelsh
+            ? 'Mae tanysgrifiadau blynyddol ar gael gyda gostyngiad ~17–18%'
+            : 'Annual subscriptions available with ~17–18% savings'}
         </div>
       </div>
     </div>
