@@ -252,15 +252,20 @@ export default function Chat() {
               )}
 
               {/* Generated image */}
-              {msg.imageUrl && (
-                <div className="mt-3">
-                  <img
-                    src={msg.imageUrl}
-                    alt="Generated image"
-                    className="rounded-2xl max-w-full h-auto border border-zinc-700"
-                  />
-                </div>
-              )}
+{msg.imageUrl && (
+  <div className="mt-3">
+    <img
+      src={msg.imageUrl}
+      alt="Generated image"
+      className="rounded-2xl w-full max-w-full h-auto object-contain border border-zinc-700"
+      loading="lazy"
+      onError={(e) => {
+        // Hide broken image on mobile if URL expired
+        (e.target as HTMLImageElement).style.display = 'none';
+      }}
+    />
+  </div>
+)}
             </div>
           </div>
         ))}
