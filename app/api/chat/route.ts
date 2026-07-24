@@ -6,46 +6,49 @@ export async function POST(request: Request) {
     const { messages, isWelsh, generateImage } = await request.json();
 
     // ========== IMAGE GENERATION ==========
-    if (generateImage) {
-      // Get the latest user message as the prompt
-      const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user');
-      const prompt = lastUserMessage?.content || 'a beautiful landscape';
+if (generateImage) {
+  const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user');
+  const prompt = lastUserMessage?.content || 'a beautiful landscape';
 
-      const imageRes = await fetch('https://api.x.ai/v1/images/generations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.XAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'grok-imagine-image', // cheaper & fast. Change to 'grok-imagine-image-quality' for better results
-          prompt: prompt,
-          n: 1,
-        }),
-      });
+  console.log('Generating image with prompt:', prompt); // ← check Vercel logs
 
-      const imageData = await imageRes.json();
+  const imageRes = await fetch('https://api.x.ai/v1/images/generations', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.XAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'grok-imagine-image', // try 'grok-imagine-image-quality' if this fails
+      prompt: prompt,
+      n: 1,
+      response_format: 'url',
+    }),
+  });
 
-      // Handle different possible response shapes
-      const imageUrl =
-        imageData.data?.[0]?.url ||
-        imageData.url ||
-        imageData.images?.[0]?.url ||
-        null;
+  const imageData = await imageRes.json();
+  console.log('Image API response:', JSON.stringify(imageData, null, 2)); // ← important
 
-      if (!imageUrl) {
-        return NextResponse.json({
-          reply: isWelsh
-            ? "Methu creu'r ddelwedd. Ceisiwch eto."
-            : "Couldn't generate the image. Please try again.",
-        });
-      }
+  const imageUrl =
+    imageData?.data?.[0]?.url ||
+    imageData?.url ||
+    imageData?.images?.[0]?.url ||
+    null;
 
-      return NextResponse.json({
-        reply: isWelsh ? 'Dyma dy ddelwedd:' : 'Here’s your image:',
-        imageUrl,
-      });
-    }
+  if (!imageUrl) {
+    return NextResponse.json({
+      reply: isWelsh
+        ? "Methu creu'r ddelwedd. Ceisiwch eto."
+        : "Couldn't generate the image. Please try again.",
+      error: imageData, // temporary – helps debug
+    });
+  }
+
+  return NextResponse.json({
+    reply: isWelsh ? 'Dyma dy ddelwedd:' : 'Here’s your image:',
+    imageUrl,
+  });
+}
 
     // ========== NORMAL CHAT ==========
     const systemPrompt = `You are Grok, a helpful AI on a.wales.
