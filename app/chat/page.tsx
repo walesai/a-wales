@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
+const MAX_HISTORY = 10; // ← only keep the last 10 messages
+
 export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
@@ -12,6 +14,9 @@ export default function Chat() {
   const [isWelsh, setIsWelsh] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Helper – always return only the last MAX_HISTORY messages
+  const trim = (msgs: any[]) => msgs.slice(-MAX_HISTORY);
+
   // Load premium status + chat history
   useEffect(() => {
     const subscribed = localStorage.getItem('isSubscribed') === 'true';
@@ -20,7 +25,8 @@ export default function Chat() {
     const saved = localStorage.getItem('chatHistory');
     if (saved) {
       try {
-        setMessages(JSON.parse(saved));
+        // Trim on load as well (in case old long history exists)
+        setMessages(trim(JSON.parse(saved)));
       } catch (e) {
         console.error('Failed to load chat history');
       }
@@ -39,7 +45,7 @@ export default function Chat() {
     }
   }, []);
 
-  // Save chat history
+  // Save chat history (already trimmed)
   useEffect(() => {
     if (messages.length > 0) {
       localStorage.setItem('chatHistory', JSON.stringify(messages));
@@ -47,57 +53,61 @@ export default function Chat() {
   }, [messages]);
 
   // Auto-scroll
-useEffect(() => {
-  setTimeout(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, 100);
-}, [messages, loading]);
+  useEffect(() => {
+    setTimeout(() => {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  }, [messages, loading]);
 
   const sendMessage = async () => {
-  if (!input.trim() || loading) return;
+    if (!input.trim() || loading) return;
 
-  // Free tier limit
-  if (!isSubscribed) {
-    let count = parseInt(localStorage.getItem('messageCount') || '0');
-    if (count >= 10) {
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: isWelsh ? 'Rydych wedi cyrraedd eich terfyn dyddiol.' : 'Daily limit reached.'
-      }]);
-      return;
+    // Free tier limit
+    if (!isSubscribed) {
+      let count = parseInt(localStorage.getItem('messageCount') || '0');
+      if (count >= 10) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: isWelsh ? 'Rydych wedi cyrraedd eich terfyn dyddiol.' : 'Daily limit reached.'
+        }]);
+        return;
+      }
+      count++;
+      localStorage.setItem('messageCount', count.toString());
+      setRemainingMessages(10 - count);
     }
-    count++;
-    localStorage.setItem('messageCount', count.toString());
-    setRemainingMessages(10 - count);
-  }
 
-  const userMessage = { role: 'user', content: input };
-  const updatedMessages = [...messages, userMessage];
-  setMessages(updatedMessages);
-  setInput('');
-  setLoading(true);
+    const userMessage = { role: 'user', content: input };
 
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: updatedMessages,   // ← send full conversation
-        isWelsh
-      }),
-    });
+    // Keep only last 10 (including the new user message)
+    const updatedMessages = trim([...messages, userMessage]);
+    setMessages(updatedMessages);
+    setInput('');
+    setLoading(true);
 
-    const data = await res.json();
-    setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
-  } catch (error) {
-    setMessages(prev => [...prev, {
-      role: 'assistant',
-      content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now."
-    }]);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: updatedMessages, // ← now only last 10
+          isWelsh
+        }),
+      });
+
+      const data = await res.json();
+
+      // Also trim after adding the assistant reply
+      setMessages(prev => trim([...prev, { role: 'assistant', content: data.reply }]));
+    } catch (error) {
+      setMessages(prev => trim([...prev, {
+        role: 'assistant',
+        content: isWelsh ? "Mae'n ddrwg gen i..." : "Sorry, I'm having trouble right now."
+      }]));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const clearChat = () => {
     if (confirm(isWelsh ? 'Clirio sgwrs?' : 'Clear chat history?')) {
@@ -106,15 +116,15 @@ useEffect(() => {
     }
   };
 
-const formatMessage = (text: string) => {
-  if (!text) return '';
-  return text
-    .replace(/\n/g, '<br>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/^- (.+)$/gm, '• $1<br>')
-    .replace(/`(.+?)`/g, '<code class="bg-zinc-700 px-1 rounded">$1</code>');
-};
+  const formatMessage = (text: string) => {
+    if (!text) return '';
+    return text
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^- (.+)$/gm, '• $1<br>')
+      .replace(/`(.+?)`/g, '<code class="bg-zinc-700 px-1 rounded">$1</code>');
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
