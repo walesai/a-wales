@@ -10,8 +10,6 @@ if (generateImage) {
   const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user');
   const prompt = lastUserMessage?.content || 'a beautiful landscape';
 
-  console.log('Generating image with prompt:', prompt); // ← check Vercel logs
-
   const imageRes = await fetch('https://api.x.ai/v1/images/generations', {
     method: 'POST',
     headers: {
@@ -19,30 +17,27 @@ if (generateImage) {
       Authorization: `Bearer ${process.env.XAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'grok-imagine-image', // try 'grok-imagine-image-quality' if this fails
+      model: 'grok-imagine-image',
       prompt: prompt,
       n: 1,
-      response_format: 'url',
+      response_format: 'b64_json', // ← important
     }),
   });
 
   const imageData = await imageRes.json();
-  console.log('Image API response:', JSON.stringify(imageData, null, 2)); // ← important
 
-  const imageUrl =
-    imageData?.data?.[0]?.url ||
-    imageData?.url ||
-    imageData?.images?.[0]?.url ||
-    null;
+  const b64 = imageData?.data?.[0]?.b64_json;
 
-  if (!imageUrl) {
+  if (!b64) {
     return NextResponse.json({
       reply: isWelsh
         ? "Methu creu'r ddelwedd. Ceisiwch eto."
         : "Couldn't generate the image. Please try again.",
-      error: imageData, // temporary – helps debug
     });
   }
+
+  // Turn it into a proper data URL
+  const imageUrl = `data:image/jpeg;base64,${b64}`;
 
   return NextResponse.json({
     reply: isWelsh ? 'Dyma dy ddelwedd:' : 'Here’s your image:',
